@@ -364,7 +364,8 @@ void isis_adj_state_change(struct isis_adjacency **padj,
 
 					circuit->upadjcount[level - 1]--;
 					if (circuit->upadjcount[level - 1] == 0)
-						isis_tx_queue_clean(circuit->tx_queue);
+						isis_tx_queue_clean(
+							circuit->tx_queue);
 				}
 
 				if (new_state == ISIS_ADJ_DOWN) {
@@ -415,7 +416,8 @@ void isis_adj_state_change(struct isis_adjacency **padj,
 				if (old_state == ISIS_ADJ_UP) {
 					circuit->upadjcount[level - 1]--;
 					if (circuit->upadjcount[level - 1] == 0)
-						isis_tx_queue_clean(circuit->tx_queue);
+						isis_tx_queue_clean(
+							circuit->tx_queue);
 				}
 
 				if (new_state == ISIS_ADJ_DOWN) {
