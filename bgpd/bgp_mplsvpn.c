@@ -1208,7 +1208,7 @@ leak_update(struct bgp *to_bgp, struct bgp_dest *bn,
 
 		/* Process change. */
 		bgp_aggregate_increment(to_bgp, p, bpi, afi, safi);
-		bgp_process(to_bgp, bn, afi, safi);
+		bgp_process(to_bgp, bn, bpi, afi, safi);
 
 		if (debug)
 			zlog_debug("%s: ->%s: %pBD Found route, changed attr",
@@ -1270,7 +1270,7 @@ leak_update(struct bgp *to_bgp, struct bgp_dest *bn,
 	bgp_aggregate_increment(to_bgp, p, new, afi, safi);
 	bgp_path_info_add(bn, new);
 
-	bgp_process(to_bgp, bn, afi, safi);
+	bgp_process(to_bgp, bn, new, afi, safi);
 
 	if (debug)
 		zlog_debug("%s: ->%s: %pBD: Added new route", __func__,
@@ -1441,6 +1441,16 @@ _vpn_leak_from_vrf_get_per_nexthop_label(struct bgp_path_info *pi,
 	return blnc->label;
 }
 
+static mpls_label_t bgp_mplsvpn_get_vpn_label(struct vpn_policy *bgp_policy)
+{
+	if (bgp_policy->tovpn_label == MPLS_LABEL_NONE &&
+	    CHECK_FLAG(bgp_policy->flags, BGP_VPN_POLICY_TOVPN_LABEL_AUTO)) {
+		bgp_lp_get(LP_TYPE_VRF, bgp_policy, vpn_leak_label_callback);
+		return MPLS_INVALID_LABEL;
+	}
+	return bgp_policy->tovpn_label;
+}
+
 /* Filter out all the cases where a per nexthop label is not possible:
  * - return an invalid label when the nexthop is invalid
  * - return the per VRF label when the per nexthop label is not supported
@@ -1469,7 +1479,7 @@ vpn_leak_from_vrf_get_per_nexthop_label(afi_t afi, struct bgp_path_info *pi,
 		 * Fallback to the per VRF label.
 		 */
 		bgp_mplsvpn_path_nh_label_unlink(pi);
-		return from_bgp->vpn_policy[afi].tovpn_label;
+		return bgp_mplsvpn_get_vpn_label(&from_bgp->vpn_policy[afi]);
 	}
 
 	if (is_bgp_static_route == false && afi == AFI_IP &&
@@ -1481,7 +1491,7 @@ vpn_leak_from_vrf_get_per_nexthop_label(afi_t afi, struct bgp_path_info *pi,
 		 * Fallback to the per VRF label.
 		 */
 		bgp_mplsvpn_path_nh_label_unlink(pi);
-		return from_bgp->vpn_policy[afi].tovpn_label;
+		return bgp_mplsvpn_get_vpn_label(&from_bgp->vpn_policy[afi]);
 	}
 
 	if (is_bgp_static_route == false && afi == AFI_IP6 &&
@@ -1495,7 +1505,7 @@ vpn_leak_from_vrf_get_per_nexthop_label(afi_t afi, struct bgp_path_info *pi,
 		 * Fallback to the per VRF label.
 		 */
 		bgp_mplsvpn_path_nh_label_unlink(pi);
-		return from_bgp->vpn_policy[afi].tovpn_label;
+		return bgp_mplsvpn_get_vpn_label(&from_bgp->vpn_policy[afi]);
 	}
 
 	/* Check the next-hop reachability.
@@ -1517,7 +1527,7 @@ vpn_leak_from_vrf_get_per_nexthop_label(afi_t afi, struct bgp_path_info *pi,
 		 * table. Fallback to the per-vrf label
 		 */
 		bgp_mplsvpn_path_nh_label_unlink(pi);
-		return from_bgp->vpn_policy[afi].tovpn_label;
+		return bgp_mplsvpn_get_vpn_label(&from_bgp->vpn_policy[afi]);
 	}
 
 	if (!nh_valid || !pi->nexthop || pi->nexthop->nexthop_num == 0 ||
@@ -1540,7 +1550,7 @@ vpn_leak_from_vrf_get_per_nexthop_label(afi_t afi, struct bgp_path_info *pi,
 		 * Fallback to per-vrf label.
 		 */
 		bgp_mplsvpn_path_nh_label_unlink(pi);
-		return from_bgp->vpn_policy[afi].tovpn_label;
+		return bgp_mplsvpn_get_vpn_label(&from_bgp->vpn_policy[afi]);
 	}
 
 	return _vpn_leak_from_vrf_get_per_nexthop_label(pi, to_bgp, from_bgp,
@@ -1755,12 +1765,10 @@ void vpn_leak_from_vrf_update(struct bgp *to_bgp,	     /* to */
 		label_val = vpn_leak_from_vrf_get_per_nexthop_label(
 			afi, path_vrf, from_bgp, to_bgp);
 	else
-		/* per VRF label mode */
-		label_val = from_bgp->vpn_policy[afi].tovpn_label;
+		label_val =
+			bgp_mplsvpn_get_vpn_label(&from_bgp->vpn_policy[afi]);
 
-	if (label_val == MPLS_INVALID_LABEL &&
-	    CHECK_FLAG(from_bgp->vpn_policy[afi].flags,
-		       BGP_VPN_POLICY_TOVPN_LABEL_PER_NEXTHOP)) {
+	if (label_val == MPLS_INVALID_LABEL) {
 		/* no valid label for the moment
 		 * when the 'bgp_mplsvpn_get_label_per_nexthop_cb' callback gets
 		 * a valid label value, it will call the current function again.
@@ -1956,7 +1964,7 @@ void vpn_leak_from_vrf_withdraw(struct bgp *to_bgp,		/* to */
 
 		bgp_aggregate_decrement(to_bgp, p, bpi, afi, safi);
 		bgp_path_info_delete(bn, bpi);
-		bgp_process(to_bgp, bn, afi, safi);
+		bgp_process(to_bgp, bn, bpi, afi, safi);
 	}
 	bgp_dest_unlock_node(bn);
 }
@@ -1976,7 +1984,7 @@ void vpn_leak_from_vrf_withdraw_all(struct bgp *to_bgp, struct bgp *from_bgp,
 
 		struct bgp_table *table;
 		struct bgp_dest *bn;
-		struct bgp_path_info *bpi;
+		struct bgp_path_info *bpi, *next;
 
 		/* This is the per-RD table of prefixes */
 		table = bgp_dest_get_bgp_table_info(pdest);
@@ -1991,7 +1999,8 @@ void vpn_leak_from_vrf_withdraw_all(struct bgp *to_bgp, struct bgp *from_bgp,
 					   __func__, bn);
 			}
 
-			for (; bpi; bpi = bpi->next) {
+			for (; (bpi != NULL) && (next = bpi->next, 1);
+			     bpi = next) {
 				if (debug)
 					zlog_debug("%s: type %d, sub_type %d",
 						   __func__, bpi->type,
@@ -2012,7 +2021,7 @@ void vpn_leak_from_vrf_withdraw_all(struct bgp *to_bgp, struct bgp *from_bgp,
 						to_bgp, bgp_dest_get_prefix(bn),
 						bpi, afi, safi);
 					bgp_path_info_delete(bn, bpi);
-					bgp_process(to_bgp, bn, afi, safi);
+					bgp_process(to_bgp, bn, bpi, afi, safi);
 					bgp_mplsvpn_path_nh_label_unlink(
 						bpi->extra->vrfleak->parent);
 				}
@@ -2506,7 +2515,7 @@ void vpn_leak_to_vrf_withdraw(struct bgp_path_info *path_vpn)
 					   bpi);
 			bgp_aggregate_decrement(bgp, p, bpi, afi, safi);
 			bgp_path_info_delete(bn, bpi);
-			bgp_process(bgp, bn, afi, safi);
+			bgp_process(bgp, bn, bpi, afi, safi);
 		}
 		bgp_dest_unlock_node(bn);
 	}
@@ -2515,7 +2524,7 @@ void vpn_leak_to_vrf_withdraw(struct bgp_path_info *path_vpn)
 void vpn_leak_to_vrf_withdraw_all(struct bgp *to_bgp, afi_t afi)
 {
 	struct bgp_dest *bn;
-	struct bgp_path_info *bpi;
+	struct bgp_path_info *bpi, *next;
 	safi_t safi = SAFI_UNICAST;
 	int debug = BGP_DEBUG(vpn, VPN_LEAK_TO_VRF);
 
@@ -2526,9 +2535,8 @@ void vpn_leak_to_vrf_withdraw_all(struct bgp *to_bgp, afi_t afi)
 	 */
 	for (bn = bgp_table_top(to_bgp->rib[afi][safi]); bn;
 	     bn = bgp_route_next(bn)) {
-
-		for (bpi = bgp_dest_get_bgp_path_info(bn); bpi;
-		     bpi = bpi->next) {
+		for (bpi = bgp_dest_get_bgp_path_info(bn);
+		     (bpi != NULL) && (next = bpi->next, 1); bpi = next) {
 			if (bpi->extra && bpi->extra->vrfleak &&
 			    bpi->extra->vrfleak->bgp_orig != to_bgp &&
 			    bpi->extra->vrfleak->parent &&
@@ -2538,7 +2546,7 @@ void vpn_leak_to_vrf_withdraw_all(struct bgp *to_bgp, afi_t afi)
 							bgp_dest_get_prefix(bn),
 							bpi, afi, safi);
 				bgp_path_info_delete(bn, bpi);
-				bgp_process(to_bgp, bn, afi, safi);
+				bgp_process(to_bgp, bn, bpi, afi, safi);
 			}
 		}
 	}
@@ -2567,8 +2575,11 @@ void vpn_leak_no_retain(struct bgp *to_bgp, struct bgp *vpn_from, afi_t afi)
 			continue;
 
 		for (bn = bgp_table_top(table); bn; bn = bgp_route_next(bn)) {
-			for (bpi = bgp_dest_get_bgp_path_info(bn); bpi;
-			     bpi = bpi->next) {
+			struct bgp_path_info *next;
+
+			for (bpi = bgp_dest_get_bgp_path_info(bn);
+			     (bpi != NULL) && (next = bpi->next, 1);
+			     bpi = next) {
 				if (bpi->extra && bpi->extra->vrfleak &&
 				    bpi->extra->vrfleak->bgp_orig == to_bgp)
 					continue;
@@ -4189,7 +4200,7 @@ static int bgp_mplsvpn_nh_label_bind_get_local_label_cb(mpls_label_t label,
 		if (!table)
 			continue;
 		SET_FLAG(pi->net->flags, BGP_NODE_LABEL_CHANGED);
-		bgp_process(table->bgp, pi->net, table->afi, table->safi);
+		bgp_process(table->bgp, pi->net, pi, table->afi, table->safi);
 	}
 
 	return 0;

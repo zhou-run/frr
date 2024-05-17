@@ -39,6 +39,7 @@
 #include "libfrr.h"
 #include "frrstr.h"
 #include "lib_errors.h"
+#include <libyang/version.h>
 #include "northbound_cli.h"
 #include "printfrr.h"
 #include "json.h"
@@ -3670,15 +3671,24 @@ static ssize_t vty_mgmt_libyang_print(void *user_data, const void *buf,
 }
 
 static void vty_out_yang_error(struct vty *vty, LYD_FORMAT format,
-			       struct ly_err_item *ei)
+			       const struct ly_err_item *ei)
 {
+#if (LY_VERSION_MAJOR < 3)
+#define data_path path
+#else
+#define data_path data_path
+#endif
 	bool have_apptag = ei->apptag && ei->apptag[0] != 0;
-	bool have_path = ei->path && ei->path[0] != 0;
+	bool have_path = ei->data_path && ei->data_path[0] != 0;
 	bool have_msg = ei->msg && ei->msg[0] != 0;
 	const char *severity = NULL;
 	const char *evalid = NULL;
 	const char *ecode = NULL;
+#if (LY_VERSION_MAJOR < 3)
 	LY_ERR err = ei->no;
+#else
+	LY_ERR err = ei->err;
+#endif
 
 	if (ei->level == LY_LLERR)
 		severity = "error";
@@ -3703,7 +3713,8 @@ static void vty_out_yang_error(struct vty *vty, LYD_FORMAT format,
 			vty_out(vty, "<error-validation>%s</error-validation>\n",
 				evalid);
 		if (have_path)
-			vty_out(vty, "<error-path>%s</error-path>\n", ei->path);
+			vty_out(vty, "<error-path>%s</error-path>\n",
+				ei->data_path);
 		if (have_apptag)
 			vty_out(vty, "<error-app-tag>%s</error-app-tag>\n",
 				ei->apptag);
@@ -3722,7 +3733,7 @@ static void vty_out_yang_error(struct vty *vty, LYD_FORMAT format,
 		if (evalid)
 			vty_out(vty, ", \"error-validation\": \"%s\"", evalid);
 		if (have_path)
-			vty_out(vty, ", \"error-path\": \"%s\"", ei->path);
+			vty_out(vty, ", \"error-path\": \"%s\"", ei->data_path);
 		if (have_apptag)
 			vty_out(vty, ", \"error-app-tag\": \"%s\"", ei->apptag);
 		if (have_msg)
@@ -3739,18 +3750,19 @@ static void vty_out_yang_error(struct vty *vty, LYD_FORMAT format,
 		if (evalid)
 			vty_out(vty, " invalid: %s", evalid);
 		if (have_path)
-			vty_out(vty, " path: %s", ei->path);
+			vty_out(vty, " path: %s", ei->data_path);
 		if (have_apptag)
 			vty_out(vty, " app-tag: %s", ei->apptag);
 		if (have_msg)
 			vty_out(vty, " msg: %s", ei->msg);
 		break;
 	}
+#undef data_path
 }
 
 static uint vty_out_yang_errors(struct vty *vty, LYD_FORMAT format)
 {
-	struct ly_err_item *ei = ly_err_first(ly_native_ctx);
+	const struct ly_err_item *ei = ly_err_first(ly_native_ctx);
 	uint count;
 
 	if (!ei)
@@ -3826,6 +3838,43 @@ static int vty_mgmt_get_tree_result_notified(
 	return 0;
 }
 
+static int vty_mgmt_edit_result_notified(struct mgmt_fe_client *client,
+					 uintptr_t user_data,
+					 uint64_t client_id, uint64_t session_id,
+					 uintptr_t session_ctx, uint64_t req_id,
+					 const char *xpath)
+{
+	struct vty *vty = (struct vty *)session_ctx;
+
+	debug_fe_client("EDIT request for client 0x%" PRIx64 " req-id %" PRIu64
+			" was successful, xpath: %s",
+			client_id, req_id, xpath);
+
+	vty_mgmt_resume_response(vty, CMD_SUCCESS);
+
+	return 0;
+}
+
+static int vty_mgmt_rpc_result_notified(struct mgmt_fe_client *client,
+					uintptr_t user_data, uint64_t client_id,
+					uint64_t session_id,
+					uintptr_t session_ctx, uint64_t req_id,
+					const char *result)
+{
+	struct vty *vty = (struct vty *)session_ctx;
+
+	debug_fe_client("RPC request for client 0x%" PRIx64 " req-id %" PRIu64
+			" was successful",
+			client_id, req_id);
+
+	if (result)
+		vty_out(vty, "%s\n", result);
+
+	vty_mgmt_resume_response(vty, CMD_SUCCESS);
+
+	return 0;
+}
+
 static int vty_mgmt_error_notified(struct mgmt_fe_client *client,
 				   uintptr_t user_data, uint64_t client_id,
 				   uint64_t session_id, uintptr_t session_ctx,
@@ -3867,6 +3916,8 @@ static struct mgmt_fe_client_cbs mgmt_cbs = {
 	.commit_config_notify = vty_mgmt_commit_config_result_notified,
 	.get_data_notify = vty_mgmt_get_data_result_notified,
 	.get_tree_notify = vty_mgmt_get_tree_result_notified,
+	.edit_notify = vty_mgmt_edit_result_notified,
+	.rpc_notify = vty_mgmt_rpc_result_notified,
 	.error_notify = vty_mgmt_error_notified,
 
 };
@@ -4118,6 +4169,47 @@ int vty_mgmt_send_get_data_req(struct vty *vty, uint8_t datastore,
 
 	vty->mgmt_req_pending_cmd = "MESSAGE_GET_DATA_REQ";
 	vty->mgmt_req_pending_data = result_type;
+
+	return 0;
+}
+
+int vty_mgmt_send_edit_req(struct vty *vty, uint8_t datastore,
+			   LYD_FORMAT request_type, uint8_t flags,
+			   uint8_t operation, const char *xpath,
+			   const char *data)
+{
+	vty->mgmt_req_id++;
+
+	if (mgmt_fe_send_edit_req(mgmt_fe_client, vty->mgmt_session_id,
+				  vty->mgmt_req_id, datastore, request_type,
+				  flags, operation, xpath, data)) {
+		zlog_err("Failed to send EDIT to MGMTD session-id: %" PRIu64
+			 " req-id %" PRIu64 ".",
+			 vty->mgmt_session_id, vty->mgmt_req_id);
+		vty_out(vty, "Failed to send EDIT to MGMTD!\n");
+		return -1;
+	}
+
+	vty->mgmt_req_pending_cmd = "MESSAGE_EDIT_REQ";
+
+	return 0;
+}
+
+int vty_mgmt_send_rpc_req(struct vty *vty, LYD_FORMAT request_type,
+			  const char *xpath, const char *data)
+{
+	vty->mgmt_req_id++;
+
+	if (mgmt_fe_send_rpc_req(mgmt_fe_client, vty->mgmt_session_id,
+				 vty->mgmt_req_id, request_type, xpath, data)) {
+		zlog_err("Failed to send RPC to MGMTD session-id: %" PRIu64
+			 " req-id %" PRIu64 ".",
+			 vty->mgmt_session_id, vty->mgmt_req_id);
+		vty_out(vty, "Failed to send RPC to MGMTD!\n");
+		return -1;
+	}
+
+	vty->mgmt_req_pending_cmd = "MESSAGE_RPC_REQ";
 
 	return 0;
 }

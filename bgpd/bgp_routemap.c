@@ -1944,7 +1944,6 @@ route_set_srte_color(void *rule, const struct prefix *prefix, void *object)
 	path = object;
 
 	path->attr->srte_color = *srte_color;
-	path->attr->flag |= ATTR_FLAG_BIT(BGP_ATTR_SRTE_COLOR);
 
 	return RMAP_OKAY;
 }
@@ -3196,7 +3195,7 @@ struct rmap_ecomm_lb_set {
 #define RMAP_ECOMM_LB_SET_CUMUL 2
 #define RMAP_ECOMM_LB_SET_NUM_MPATH 3
 	bool non_trans;
-	uint32_t bw;
+	uint64_t bw;
 };
 
 static enum route_map_cmd_result_t
@@ -3206,8 +3205,7 @@ route_set_ecommunity_lb(void *rule, const struct prefix *prefix, void *object)
 	struct bgp_path_info *path;
 	struct peer *peer;
 	struct ecommunity ecom_lb = {0};
-	struct ecommunity_val lb_eval;
-	uint32_t bw_bytes = 0;
+	uint64_t bw_bytes = 0;
 	uint16_t mpath_count = 0;
 	struct ecommunity *new_ecom;
 	struct ecommunity *old_ecom;
@@ -3221,13 +3219,13 @@ route_set_ecommunity_lb(void *rule, const struct prefix *prefix, void *object)
 	/* Build link bandwidth extended community */
 	as = (peer->bgp->as > BGP_AS_MAX) ? BGP_AS_TRANS : peer->bgp->as;
 	if (rels->lb_type == RMAP_ECOMM_LB_SET_VALUE) {
-		bw_bytes = ((uint64_t)rels->bw * 1000 * 1000) / 8;
+		bw_bytes = (rels->bw * 1000 * 1000) / 8;
 	} else if (rels->lb_type == RMAP_ECOMM_LB_SET_CUMUL) {
 		/* process this only for the best path. */
 		if (!CHECK_FLAG(path->flags, BGP_PATH_SELECTED))
 			return RMAP_OKAY;
 
-		bw_bytes = (uint32_t)bgp_path_info_mpath_cumbw(path);
+		bw_bytes = bgp_path_info_mpath_cumbw(path);
 		if (!bw_bytes)
 			return RMAP_OKAY;
 
@@ -3237,31 +3235,53 @@ route_set_ecommunity_lb(void *rule, const struct prefix *prefix, void *object)
 		if (!CHECK_FLAG(path->flags, BGP_PATH_SELECTED))
 			return RMAP_OKAY;
 
-		bw_bytes = ((uint64_t)peer->bgp->lb_ref_bw * 1000 * 1000) / 8;
+		bw_bytes = (peer->bgp->lb_ref_bw * 1000 * 1000) / 8;
 		mpath_count = bgp_path_info_mpath_count(path) + 1;
 		bw_bytes *= mpath_count;
 	}
 
-	encode_lb_extcomm(as, bw_bytes, rels->non_trans, &lb_eval,
-			  CHECK_FLAG(peer->flags,
-				     PEER_FLAG_DISABLE_LINK_BW_ENCODING_IEEE));
+	if (CHECK_FLAG(peer->flags, PEER_FLAG_EXTENDED_LINK_BANDWIDTH)) {
+		struct ecommunity_val_ipv6 lb_eval;
 
-	/* add to route or merge with existing */
-	old_ecom = bgp_attr_get_ecommunity(path->attr);
-	if (old_ecom) {
-		new_ecom = ecommunity_dup(old_ecom);
-		ecommunity_add_val(new_ecom, &lb_eval, true, true);
-		if (!old_ecom->refcnt)
-			ecommunity_free(&old_ecom);
+		encode_lb_extended_extcomm(as, bw_bytes, rels->non_trans,
+					   &lb_eval);
+
+		old_ecom = bgp_attr_get_ipv6_ecommunity(path->attr);
+		if (old_ecom) {
+			new_ecom = ecommunity_dup(old_ecom);
+			ecommunity_add_val_ipv6(new_ecom, &lb_eval, true, true);
+			if (!old_ecom->refcnt)
+				ecommunity_free(&old_ecom);
+		} else {
+			ecom_lb.size = 1;
+			ecom_lb.unit_size = IPV6_ECOMMUNITY_SIZE;
+			ecom_lb.val = (uint8_t *)lb_eval.val;
+			new_ecom = ecommunity_dup(&ecom_lb);
+		}
+
+		bgp_attr_set_ipv6_ecommunity(path->attr, new_ecom);
 	} else {
-		ecom_lb.size = 1;
-		ecom_lb.unit_size = ECOMMUNITY_SIZE;
-		ecom_lb.val = (uint8_t *)lb_eval.val;
-		new_ecom = ecommunity_dup(&ecom_lb);
-	}
+		struct ecommunity_val lb_eval;
 
-	/* new_ecom will be intern()'d or attr_flush()'d in call stack */
-	bgp_attr_set_ecommunity(path->attr, new_ecom);
+		encode_lb_extcomm(as, bw_bytes, rels->non_trans, &lb_eval,
+				  CHECK_FLAG(peer->flags,
+					     PEER_FLAG_DISABLE_LINK_BW_ENCODING_IEEE));
+
+		old_ecom = bgp_attr_get_ecommunity(path->attr);
+		if (old_ecom) {
+			new_ecom = ecommunity_dup(old_ecom);
+			ecommunity_add_val(new_ecom, &lb_eval, true, true);
+			if (!old_ecom->refcnt)
+				ecommunity_free(&old_ecom);
+		} else {
+			ecom_lb.size = 1;
+			ecom_lb.unit_size = ECOMMUNITY_SIZE;
+			ecom_lb.val = (uint8_t *)lb_eval.val;
+			new_ecom = ecommunity_dup(&ecom_lb);
+		}
+
+		bgp_attr_set_ecommunity(path->attr, new_ecom);
+	}
 
 	/* Mark that route-map has set link bandwidth; used in attribute
 	 * setting decisions.
@@ -3275,7 +3295,7 @@ static void *route_set_ecommunity_lb_compile(const char *arg)
 {
 	struct rmap_ecomm_lb_set *rels;
 	uint8_t lb_type;
-	uint32_t bw = 0;
+	uint64_t bw = 0;
 	char bw_str[40] = {0};
 	char *p, *str;
 	bool non_trans = false;
@@ -3317,13 +3337,8 @@ static enum route_map_cmd_result_t
 route_set_ecommunity_color(void *rule, const struct prefix *prefix,
 			   void *object)
 {
-	struct bgp_path_info *path;
-
-	path = object;
-
 	route_set_ecommunity(rule, prefix, object);
 
-	path->attr->flag |= ATTR_FLAG_BIT(BGP_ATTR_SRTE_COLOR);
 	return RMAP_OKAY;
 }
 
@@ -5882,10 +5897,11 @@ DEFUN_YANG (set_table_id,
 
 DEFUN_YANG (no_set_table_id,
 	    no_set_table_id_cmd,
-	    "no set table",
+	    "no set table [(1-4294967295)]",
 	    NO_STR
 	    SET_STR
-	    "export route to non-main kernel table\n")
+	    "export route to non-main kernel table\n"
+	    "Kernel routing table id\n")
 {
 	const char *xpath = "./set-action[action='frr-bgp-route-map:table']";
 	nb_cli_enqueue_change(vty, xpath, NB_OP_DESTROY, NULL);
@@ -6273,13 +6289,12 @@ DEFPY_YANG(
 }
 
 DEFUN_YANG (no_set_aspath_prepend,
-	    no_set_aspath_prepend_cmd,
-	    "no set as-path prepend [ASNUM] [last-as [(1-10)]]",
+	    no_set_aspath_prepend_last_as_cmd,
+	    "no set as-path prepend [last-as [(1-10)]]",
 	    NO_STR
 	    SET_STR
 	    "Transform BGP AS_PATH attribute\n"
 	    "Prepend to the as-path\n"
-	    AS_STR
 	    "Use the peers AS-number\n"
 	    "Number of times to insert\n")
 {
@@ -6289,6 +6304,15 @@ DEFUN_YANG (no_set_aspath_prepend,
 	nb_cli_enqueue_change(vty, xpath, NB_OP_DESTROY, NULL);
 	return nb_cli_apply_changes(vty, NULL);
 }
+
+ALIAS_YANG (no_set_aspath_prepend,
+            no_set_aspath_prepend_as_cmd,
+            "no set as-path prepend ASNUM...",
+            NO_STR
+            SET_STR
+            "Transform BGP AS_PATH attribute\n"
+            "Prepend to the as-path\n"
+            AS_STR)
 
 DEFUN_YANG (set_aspath_exclude,
 	    set_aspath_exclude_cmd,
@@ -6875,7 +6899,7 @@ DEFUN_YANG(no_set_ecommunity_none, no_set_ecommunity_none_cmd,
 
 DEFUN_YANG (set_ecommunity_lb,
 	    set_ecommunity_lb_cmd,
-	    "set extcommunity bandwidth <(1-25600)|cumulative|num-multipaths> [non-transitive]",
+	    "set extcommunity bandwidth <(1-4294967295)|cumulative|num-multipaths> [non-transitive]",
 	    SET_STR
 	    "BGP extended community attribute\n"
 	    "Link bandwidth extended community\n"
@@ -6929,7 +6953,7 @@ DEFUN_YANG (set_ecommunity_lb,
 
 DEFUN_YANG (no_set_ecommunity_lb,
 	    no_set_ecommunity_lb_cmd,
-	    "no set extcommunity bandwidth <(1-25600)|cumulative|num-multipaths> [non-transitive]",
+	    "no set extcommunity bandwidth <(1-4294967295)|cumulative|num-multipaths> [non-transitive]",
 	    NO_STR
 	    SET_STR
 	    "BGP extended community attribute\n"
@@ -7966,7 +7990,8 @@ void bgp_route_map_init(void)
 	install_element(RMAP_NODE, &set_aspath_exclude_access_list_cmd);
 	install_element(RMAP_NODE, &set_aspath_replace_asn_cmd);
 	install_element(RMAP_NODE, &set_aspath_replace_access_list_cmd);
-	install_element(RMAP_NODE, &no_set_aspath_prepend_cmd);
+	install_element(RMAP_NODE, &no_set_aspath_prepend_last_as_cmd);
+	install_element(RMAP_NODE, &no_set_aspath_prepend_as_cmd);
 	install_element(RMAP_NODE, &no_set_aspath_exclude_cmd);
 	install_element(RMAP_NODE, &no_set_aspath_exclude_all_cmd);
 	install_element(RMAP_NODE, &no_set_aspath_exclude_access_list_cmd);

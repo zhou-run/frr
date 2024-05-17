@@ -1040,7 +1040,7 @@ int zapi_nexthop_encode(struct stream *s, const struct zapi_nexthop *api_nh,
 	}
 
 	if (api_nh->weight)
-		stream_putl(s, api_nh->weight);
+		stream_putq(s, api_nh->weight);
 
 	/* Router MAC for EVPN routes. */
 	if (CHECK_FLAG(nh_flags, ZAPI_NEXTHOP_FLAG_EVPN))
@@ -1125,6 +1125,7 @@ int zapi_srv6_locator_encode(struct stream *s, const struct srv6_locator *l)
 	stream_put(s, l->name, strlen(l->name));
 	stream_putw(s, l->prefix.prefixlen);
 	stream_put(s, &l->prefix.prefix, sizeof(l->prefix.prefix));
+	stream_putc(s, l->flags);
 	return 0;
 }
 
@@ -1140,6 +1141,7 @@ int zapi_srv6_locator_decode(struct stream *s, struct srv6_locator *l)
 	STREAM_GETW(s, l->prefix.prefixlen);
 	STREAM_GET(&l->prefix.prefix, s, sizeof(l->prefix.prefix));
 	l->prefix.family = AF_INET6;
+	STREAM_GETC(s, l->flags);
 	return 0;
 
 stream_failure:
@@ -1412,7 +1414,7 @@ int zapi_nexthop_decode(struct stream *s, struct zapi_nexthop *api_nh,
 	}
 
 	if (CHECK_FLAG(api_nh->flags, ZAPI_NEXTHOP_FLAG_WEIGHT))
-		STREAM_GETL(s, api_nh->weight);
+		STREAM_GETQ(s, api_nh->weight);
 
 	/* Router MAC for EVPN routes. */
 	if (CHECK_FLAG(api_nh->flags, ZAPI_NEXTHOP_FLAG_EVPN))
@@ -4670,21 +4672,25 @@ char *zclient_dump_route_flags(uint32_t flags, char *buf, size_t len)
 		return buf;
 	}
 
-	snprintfrr(
-		buf, len, "%s%s%s%s%s%s%s%s%s%s",
-		CHECK_FLAG(flags, ZEBRA_FLAG_ALLOW_RECURSION) ? "Recursion "
-							      : "",
-		CHECK_FLAG(flags, ZEBRA_FLAG_SELFROUTE) ? "Self " : "",
-		CHECK_FLAG(flags, ZEBRA_FLAG_IBGP) ? "iBGP " : "",
-		CHECK_FLAG(flags, ZEBRA_FLAG_SELECTED) ? "Selected " : "",
-		CHECK_FLAG(flags, ZEBRA_FLAG_FIB_OVERRIDE) ? "Override " : "",
-		CHECK_FLAG(flags, ZEBRA_FLAG_EVPN_ROUTE) ? "Evpn " : "",
-		CHECK_FLAG(flags, ZEBRA_FLAG_RR_USE_DISTANCE) ? "RR Distance "
-							      : "",
-		CHECK_FLAG(flags, ZEBRA_FLAG_TRAPPED) ? "Trapped " : "",
-		CHECK_FLAG(flags, ZEBRA_FLAG_OFFLOADED) ? "Offloaded " : "",
-		CHECK_FLAG(flags, ZEBRA_FLAG_OFFLOAD_FAILED) ? "Offload Failed "
-							     : "");
+	snprintfrr(buf, len, "%s%s%s%s%s%s%s%s%s%s%s",
+		   CHECK_FLAG(flags, ZEBRA_FLAG_ALLOW_RECURSION) ? "Recursion "
+								 : "",
+
+		   CHECK_FLAG(flags, ZEBRA_FLAG_SELFROUTE) ? "Self " : "",
+		   CHECK_FLAG(flags, ZEBRA_FLAG_IBGP) ? "iBGP " : "",
+		   CHECK_FLAG(flags, ZEBRA_FLAG_SELECTED) ? "Selected " : "",
+		   CHECK_FLAG(flags, ZEBRA_FLAG_FIB_OVERRIDE) ? "Override " : "",
+		   CHECK_FLAG(flags, ZEBRA_FLAG_EVPN_ROUTE) ? "Evpn " : "",
+		   CHECK_FLAG(flags, ZEBRA_FLAG_RR_USE_DISTANCE) ? "RR Distance "
+								 : "",
+
+		   CHECK_FLAG(flags, ZEBRA_FLAG_TRAPPED) ? "Trapped " : "",
+		   CHECK_FLAG(flags, ZEBRA_FLAG_OFFLOADED) ? "Offloaded " : "",
+		   CHECK_FLAG(flags, ZEBRA_FLAG_OFFLOAD_FAILED)
+			   ? "Offload Failed "
+			   : "",
+		   CHECK_FLAG(flags, ZEBRA_FLAG_OUTOFSYNC) ? "OutOfSync " : "");
+
 	return buf;
 }
 

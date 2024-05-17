@@ -39,7 +39,6 @@
 #include "frrstr.h"
 #include "json.h"
 #include "ferr.h"
-#include "bgpd/bgp_vty.h"
 
 DEFINE_MTYPE_STATIC(MVTYSH, VTYSH_CMD, "Vtysh cmd copy");
 
@@ -3423,7 +3422,7 @@ static void show_route_map_send(const char *route_map, bool json)
 	bool first = true;
 	char command_line[128];
 
-	snprintf(command_line, sizeof(command_line), "show route-map ");
+	snprintf(command_line, sizeof(command_line), "do show route-map ");
 	if (route_map)
 		strlcat(command_line, route_map, sizeof(command_line));
 	if (json)
@@ -3474,6 +3473,259 @@ DEFPY (show_route_map,
 	return CMD_SUCCESS;
 }
 
+static void show_prefix_list_send(afi_t afi, const char *prefix_list,
+				  const char *seq, enum display_type dtype,
+				  bool json)
+{
+	unsigned int i;
+	bool first = true;
+	char command_line[128];
+
+	if (afi == AFI_IP)
+		snprintf(command_line, sizeof(command_line),
+			 "do show ip prefix-list ");
+	else if (afi == AFI_IP6)
+		snprintf(command_line, sizeof(command_line),
+			 "do show ipv6 prefix-list ");
+	if (dtype == detail_display)
+		strlcat(command_line, "detail ", sizeof(command_line));
+	else if (dtype == summary_display)
+		strlcat(command_line, "summary ", sizeof(command_line));
+	if (prefix_list)
+		strlcat(command_line, prefix_list, sizeof(command_line));
+	if (dtype == sequential_display) {
+		strlcat(command_line, " seq ", sizeof(command_line));
+		strlcat(command_line, seq, sizeof(command_line));
+	}
+	if (json)
+		strlcat(command_line, " json", sizeof(command_line));
+
+	if (json)
+		vty_out(vty, "{");
+
+	for (i = 0; i < array_size(vtysh_client); i++) {
+		const struct vtysh_client *client = &vtysh_client[i];
+		bool is_connected = true;
+
+		if (!CHECK_FLAG(client->flag, VTYSH_PREFIX_LIST_SHOW))
+			continue;
+
+		for (; client; client = client->next)
+			if (client->fd < 0)
+				is_connected = false;
+
+		if (!is_connected)
+			continue;
+
+		if (json && !first)
+			vty_out(vty, ",");
+		else
+			first = false;
+
+		if (json)
+			vty_out(vty, "\"%s\":", vtysh_client[i].name);
+
+		vtysh_client_execute_name(vtysh_client[i].name, command_line);
+	}
+
+	if (json)
+		vty_out(vty, "}\n");
+}
+
+DEFPY (show_ip_prefix_list,
+       show_ip_prefix_list_cmd,
+       "show ip prefix-list [PREFIXLIST4_NAME$name [seq$dseq (1-4294967295)$arg]] [json$uj]",
+       SHOW_STR
+       IP_STR
+       PREFIX_LIST_STR
+       "Name of a prefix list\n"
+       "sequence number of an entry\n"
+       "Sequence number\n"
+       JSON_STR)
+{
+	enum display_type dtype = normal_display;
+
+	if (dseq)
+		dtype = sequential_display;
+
+	show_prefix_list_send(AFI_IP, name, arg_str, dtype, !!uj);
+	return CMD_SUCCESS;
+}
+
+DEFPY (show_ip_prefix_list_summary,
+       show_ip_prefix_list_summary_cmd,
+       "show ip prefix-list summary [PREFIXLIST4_NAME$name] [json$uj]",
+       SHOW_STR
+       IP_STR
+       PREFIX_LIST_STR
+       "Summary of prefix lists\n"
+       "Name of a prefix list\n"
+       JSON_STR)
+{
+	show_prefix_list_send(AFI_IP, name, NULL, summary_display, !!uj);
+	return CMD_SUCCESS;
+}
+
+DEFPY (show_ip_prefix_list_detail,
+       show_ip_prefix_list_detail_cmd,
+       "show ip prefix-list detail [PREFIXLIST4_NAME$name] [json$uj]",
+       SHOW_STR
+       IP_STR
+       PREFIX_LIST_STR
+       "Detail of prefix lists\n"
+       "Name of a prefix list\n"
+       JSON_STR)
+{
+	show_prefix_list_send(AFI_IP, name, NULL, detail_display, !!uj);
+	return CMD_SUCCESS;
+}
+
+DEFPY (show_ipv6_prefix_list,
+       show_ipv6_prefix_list_cmd,
+       "show ipv6 prefix-list [PREFIXLIST6_NAME$name [seq$dseq (1-4294967295)$arg]] [json$uj]",
+       SHOW_STR
+       IPV6_STR
+       PREFIX_LIST_STR
+       "Name of a prefix list\n"
+       "sequence number of an entry\n"
+       "Sequence number\n"
+       JSON_STR)
+{
+	enum display_type dtype = normal_display;
+
+	if (dseq)
+		dtype = sequential_display;
+
+	show_prefix_list_send(AFI_IP6, name, arg_str, dtype, !!uj);
+	return CMD_SUCCESS;
+}
+
+DEFPY (show_ipv6_prefix_list_summary,
+       show_ipv6_prefix_list_summary_cmd,
+       "show ipv6 prefix-list summary [PREFIXLIST6_NAME$name] [json$uj]",
+       SHOW_STR
+       IPV6_STR
+       PREFIX_LIST_STR
+       "Summary of prefix lists\n"
+       "Name of a prefix list\n"
+       JSON_STR)
+{
+	show_prefix_list_send(AFI_IP6, name, NULL, summary_display, !!uj);
+	return CMD_SUCCESS;
+}
+
+DEFPY (show_ipv6_prefix_list_detail,
+       show_ipv6_prefix_list_detail_cmd,
+       "show ipv6 prefix-list detail [PREFIXLIST6_NAME$name] [json$uj]",
+       SHOW_STR
+       IPV6_STR
+       PREFIX_LIST_STR
+       "Detail of prefix lists\n"
+       "Name of a prefix list\n"
+       JSON_STR)
+{
+	show_prefix_list_send(AFI_IP6, name, NULL, detail_display, !!uj);
+	return CMD_SUCCESS;
+}
+
+static void show_access_list_send(afi_t afi, const char *access_list, bool json)
+{
+	unsigned int i;
+	bool first = true;
+	char command_line[128];
+
+	if (afi == AFI_IP)
+		snprintf(command_line, sizeof(command_line),
+			 "do show ip access-list ");
+	else if (afi == AFI_IP6)
+		snprintf(command_line, sizeof(command_line),
+			 "do show ipv6 access-list ");
+	if (access_list)
+		strlcat(command_line, access_list, sizeof(command_line));
+	if (json) {
+		strlcat(command_line, " json", sizeof(command_line));
+		vty_out(vty, "{");
+	}
+
+	for (i = 0; i < array_size(vtysh_client); i++) {
+		const struct vtysh_client *client = &vtysh_client[i];
+		bool is_connected = true;
+
+		if (!CHECK_FLAG(client->flag, VTYSH_ACCESS_LIST_SHOW))
+			continue;
+
+		for (; client; client = client->next)
+			if (client->fd < 0)
+				is_connected = false;
+
+		if (!is_connected)
+			continue;
+
+		if (json && !first)
+			vty_out(vty, ",");
+		else
+			first = false;
+
+		if (json)
+			vty_out(vty, "\"%s\":", vtysh_client[i].name);
+
+		vtysh_client_execute_name(vtysh_client[i].name, command_line);
+	}
+
+	if (json)
+		vty_out(vty, "}\n");
+}
+
+DEFPY (show_ip_access_list,
+       show_ip_access_list_cmd,
+       "show ip access-list [json$uj]",
+       SHOW_STR
+       IP_STR
+       "List IP access lists\n"
+       JSON_STR)
+{
+	show_access_list_send(AFI_IP, NULL, !!uj);
+	return CMD_SUCCESS;
+}
+
+DEFPY (show_ip_access_list_name,
+       show_ip_access_list_name_cmd,
+       "show ip access-list ACCESSLIST4_NAME$name [json$uj]",
+       SHOW_STR
+       IP_STR
+       "List IP access lists\n"
+       "IP access-list name\n"
+       JSON_STR)
+{
+	show_access_list_send(AFI_IP, name, !!uj);
+	return CMD_SUCCESS;
+}
+
+DEFPY (show_ipv6_access_list,
+       show_ipv6_access_list_cmd,
+       "show ipv6 access-list [json$uj]",
+       SHOW_STR
+       IPV6_STR
+       "List IPv6 access lists\n"
+       JSON_STR)
+{
+	show_access_list_send(AFI_IP6, NULL, !!uj);
+	return CMD_SUCCESS;
+}
+
+DEFPY (show_ipv6_access_list_name,
+       show_ipv6_access_list_name_cmd,
+       "show ipv6 access-list ACCESSLIST6_NAME$name [json$uj]",
+       SHOW_STR
+       IPV6_STR
+       "List IPv6 access lists\n"
+       "IPv6 access-list name\n"
+       JSON_STR)
+{
+	show_access_list_send(AFI_IP6, name, !!uj);
+	return CMD_SUCCESS;
+}
+
 DEFUN (vtysh_integrated_config,
        vtysh_integrated_config_cmd,
        "service integrated-vtysh-config",
@@ -3498,8 +3750,8 @@ DEFUN (no_vtysh_integrated_config,
 static void backup_config_file(const char *fbackup)
 {
 	char *integrate_sav = NULL;
-
 	size_t integrate_sav_sz = strlen(fbackup) + strlen(CONF_BACKUP_EXT) + 1;
+
 	integrate_sav = malloc(integrate_sav_sz);
 	strlcpy(integrate_sav, fbackup, integrate_sav_sz);
 	strlcat(integrate_sav, CONF_BACKUP_EXT, integrate_sav_sz);
@@ -4999,11 +5251,13 @@ void vtysh_init_vty(void)
 	install_element(VRF_NODE, &vtysh_exit_vrf_cmd);
 	install_element(VRF_NODE, &vtysh_quit_vrf_cmd);
 
+#ifdef HAVE_BGPD
 	install_node(&rpki_vrf_node);
 	install_element(VRF_NODE, &rpki_cmd);
 	install_element(RPKI_VRF_NODE, &rpki_exit_cmd);
 	install_element(RPKI_VRF_NODE, &rpki_quit_cmd);
 	install_element(RPKI_VRF_NODE, &vtysh_end_all_cmd);
+#endif
 
 	install_element(CONFIG_NODE, &vtysh_affinity_map_cmd);
 	install_element(CONFIG_NODE, &vtysh_no_affinity_map_cmd);
@@ -5072,6 +5326,16 @@ void vtysh_init_vty(void)
 	install_element(ENABLE_NODE, &vtysh_copy_to_running_cmd);
 
 	install_element(ENABLE_NODE, &show_route_map_cmd);
+	install_element(ENABLE_NODE, &show_ip_prefix_list_cmd);
+	install_element(ENABLE_NODE, &show_ip_prefix_list_summary_cmd);
+	install_element(ENABLE_NODE, &show_ip_prefix_list_detail_cmd);
+	install_element(ENABLE_NODE, &show_ipv6_prefix_list_cmd);
+	install_element(ENABLE_NODE, &show_ipv6_prefix_list_summary_cmd);
+	install_element(ENABLE_NODE, &show_ipv6_prefix_list_detail_cmd);
+	install_element(ENABLE_NODE, &show_ip_access_list_cmd);
+	install_element(ENABLE_NODE, &show_ip_access_list_name_cmd);
+	install_element(ENABLE_NODE, &show_ipv6_access_list_cmd);
+	install_element(ENABLE_NODE, &show_ipv6_access_list_name_cmd);
 
 	/* "write terminal" command. */
 	install_element(ENABLE_NODE, &vtysh_write_terminal_cmd);

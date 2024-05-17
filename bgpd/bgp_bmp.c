@@ -391,11 +391,11 @@ static int bmp_send_initiation(struct bmp *bmp)
 
 	bmp_common_hdr(s, BMP_VERSION_3, BMP_TYPE_INITIATION);
 
-#define BMP_INFO_TYPE_SYSDESCR	1
-#define BMP_INFO_TYPE_SYSNAME	2
-	bmp_put_info_tlv(s, BMP_INFO_TYPE_SYSDESCR,
-			FRR_FULL_NAME " " FRR_VER_SHORT);
-	bmp_put_info_tlv(s, BMP_INFO_TYPE_SYSNAME, cmd_hostname_get());
+#define BMP_INIT_INFO_TYPE_SYSDESCR 1
+#define BMP_INIT_INFO_TYPE_SYSNAME  2
+	bmp_put_info_tlv(s, BMP_INIT_INFO_TYPE_SYSDESCR,
+			 FRR_FULL_NAME " " FRR_VER_SHORT);
+	bmp_put_info_tlv(s, BMP_INIT_INFO_TYPE_SYSNAME, cmd_hostname_get());
 
 	len = stream_get_endp(s);
 	stream_putl_at(s, BMP_LENGTH_POS, len); /* message length is set. */
@@ -438,6 +438,7 @@ static struct stream *bmp_peerstate(struct peer *peer, bool down)
 	monotime_to_realtime(&uptime, &uptime_real);
 
 #define BGP_BMP_MAX_PACKET_SIZE	1024
+#define BMP_PEERUP_INFO_TYPE_STRING 0
 	s = stream_new(BGP_MAX_PACKET_SIZE);
 
 	if (peer_established(peer->connection) && !down) {
@@ -493,7 +494,8 @@ static struct stream *bmp_peerstate(struct peer *peer, bool down)
 		}
 
 		if (peer->desc)
-			bmp_put_info_tlv(s, 0, peer->desc);
+			bmp_put_info_tlv(s, BMP_PEERUP_INFO_TYPE_STRING,
+					 peer->desc);
 	} else {
 		uint8_t type;
 		size_t type_pos;
@@ -1592,6 +1594,15 @@ static void bmp_stat_put_u32(struct stream *s, size_t *cnt, uint16_t type,
 	(*cnt)++;
 }
 
+static void bmp_stat_put_u64(struct stream *s, size_t *cnt, uint16_t type,
+			     uint64_t value)
+{
+	stream_putw(s, type);
+	stream_putw(s, 8);
+	stream_putq(s, value);
+	(*cnt)++;
+}
+
 static void bmp_stats(struct event *thread)
 {
 	struct bmp_targets *bt = EVENT_ARG(thread);
@@ -1633,8 +1644,13 @@ static void bmp_stats(struct event *thread)
 				peer->stat_pfx_dup_withdraw);
 		bmp_stat_put_u32(s, &count, BMP_STATS_UPD_7606_WITHDRAW,
 				peer->stat_upd_7606);
-		bmp_stat_put_u32(s, &count, BMP_STATS_FRR_NH_INVALID,
-				peer->stat_pfx_nh_invalid);
+		if (bt->stats_send_experimental)
+			bmp_stat_put_u32(s, &count, BMP_STATS_FRR_NH_INVALID,
+					 peer->stat_pfx_nh_invalid);
+		bmp_stat_put_u64(s, &count, BMP_STATS_SIZE_ADJ_RIB_IN,
+				 peer->stat_pfx_adj_rib_in);
+		bmp_stat_put_u64(s, &count, BMP_STATS_SIZE_LOC_RIB,
+				 peer->stat_pfx_loc_rib);
 
 		stream_putl_at(s, count_pos, count);
 
@@ -1889,6 +1905,7 @@ static struct bmp_targets *bmp_targets_get(struct bgp *bgp, const char *name)
 	bt->name = XSTRDUP(MTYPE_BMP_TARGETSNAME, name);
 	bt->bgp = bgp;
 	bt->bmpbgp = bmp_bgp_get(bgp);
+	bt->stats_send_experimental = true;
 	bmp_session_init(&bt->sessions);
 	bmp_qhash_init(&bt->updhash);
 	bmp_qlist_init(&bt->updlist);
@@ -2469,6 +2486,21 @@ DEFPY(bmp_stats_cfg,
 	return CMD_SUCCESS;
 }
 
+DEFPY(bmp_stats_send_experimental,
+      bmp_stats_send_experimental_cmd,
+      "[no] bmp stats send-experimental",
+      NO_STR
+      BMP_STR
+      "Send BMP statistics messages\n"
+      "Send experimental BMP stats [65531-65534]\n")
+{
+	VTY_DECLVAR_CONTEXT_SUB(bmp_targets, bt);
+
+	bt->stats_send_experimental = !no;
+
+	return CMD_SUCCESS;
+}
+
 #define BMP_POLICY_IS_LOCRIB(str) ((str)[0] == 'l') /* __l__oc-rib */
 #define BMP_POLICY_IS_PRE(str) ((str)[1] == 'r')    /* p__r__e-policy */
 
@@ -2761,6 +2793,9 @@ static int bmp_config_write(struct bgp *bgp, struct vty *vty)
 		if (bt->acl_name)
 			vty_out(vty, "  ip access-list %s\n", bt->acl_name);
 
+		if (!bt->stats_send_experimental)
+			vty_out(vty, "  no bmp stats send-experimental\n");
+
 		if (bt->stat_msec)
 			vty_out(vty, "  bmp stats interval %d\n",
 					bt->stat_msec);
@@ -2816,6 +2851,7 @@ static int bgp_bmp_init(struct event_loop *tm)
 	install_element(BMP_NODE, &no_bmp_listener_cmd);
 	install_element(BMP_NODE, &bmp_connect_cmd);
 	install_element(BMP_NODE, &bmp_acl_cmd);
+	install_element(BMP_NODE, &bmp_stats_send_experimental_cmd);
 	install_element(BMP_NODE, &bmp_stats_cmd);
 	install_element(BMP_NODE, &bmp_monitor_cmd);
 	install_element(BMP_NODE, &bmp_mirror_cmd);

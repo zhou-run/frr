@@ -1795,8 +1795,8 @@ static struct nexthop *nexthop_set_resolved(afi_t afi,
 		break;
 	}
 
-	if (newhop->flags & NEXTHOP_FLAG_ONLINK)
-		resolved_hop->flags |= NEXTHOP_FLAG_ONLINK;
+	if (CHECK_FLAG(newhop->flags, NEXTHOP_FLAG_ONLINK))
+		SET_FLAG(resolved_hop->flags, NEXTHOP_FLAG_ONLINK);
 
 	/* Copy labels of the resolved route and the parent resolving to it */
 	if (policy) {
@@ -3664,8 +3664,9 @@ void zebra_interface_nhg_reinstall(struct interface *ifp)
 					"%s: Setting the valid flag for nhe %pNG, interface: %s",
 					__func__, rb_node_dep->nhe, ifp->name);
 		}
+
 		/* Check for singleton NHG associated to interface */
-		if (nexthop_is_ifindex_type(nh) &&
+		if (!nexthop_is_blackhole(nh) &&
 		    zebra_nhg_depends_is_empty(rb_node_dep->nhe)) {
 			struct nhg_connected *rb_node_dependent;
 

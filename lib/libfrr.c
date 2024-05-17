@@ -59,7 +59,7 @@ char config_default[512];
 char frr_zclientpath[512];
 static char pidfile_default[1024];
 #ifdef HAVE_SQLITE3
-static char dbfile_default[512];
+static char dbfile_default[1024];
 #endif
 static char vtypath_default[512];
 
@@ -1449,4 +1449,13 @@ void _libfrr_version(void)
 		"configured with:\n    " FRR_CONFIG_ARGS "\n";
 	write(1, banner, sizeof(banner) - 1);
 	_exit(0);
+}
+
+/* Render simple version tuple to string */
+const char *frr_vers2str(uint32_t version, char *buf, int buflen)
+{
+	snprintf(buf, buflen, "%d.%d.%d", MAJOR_FRRVERSION(version),
+		 MINOR_FRRVERSION(version), SUB_FRRVERSION(version));
+
+	return buf;
 }

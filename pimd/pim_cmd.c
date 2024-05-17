@@ -1941,12 +1941,15 @@ DEFUN (show_ip_pim_mlag_summary,
 		json_object *json_stat = NULL;
 
 		json = json_object_new_object();
-		if (router->mlag_flags & PIM_MLAGF_LOCAL_CONN_UP)
-			json_object_boolean_true_add(json, "mlagConnUp");
-		if (router->mlag_flags & PIM_MLAGF_PEER_CONN_UP)
-			json_object_boolean_true_add(json, "mlagPeerConnUp");
-		if (router->mlag_flags & PIM_MLAGF_PEER_ZEBRA_UP)
-			json_object_boolean_true_add(json, "mlagPeerZebraUp");
+		json_object_boolean_add(json, "mlagConnUp",
+					CHECK_FLAG(router->mlag_flags,
+						   PIM_MLAGF_LOCAL_CONN_UP));
+		json_object_boolean_add(json, "mlagPeerConnUp",
+					CHECK_FLAG(router->mlag_flags,
+						   PIM_MLAGF_PEER_CONN_UP));
+		json_object_boolean_add(json, "mlagPeerZebraUp",
+					CHECK_FLAG(router->mlag_flags,
+						   PIM_MLAGF_PEER_ZEBRA_UP));
 		json_object_string_add(json, "mlagRole",
 				       mlag_role2str(router->mlag_role,
 						     role_buf, sizeof(role_buf)));
@@ -3953,7 +3956,7 @@ DEFUN (interface_no_ip_igmp_last_member_query_interval,
 
 DEFUN (interface_ip_pim_drprio,
        interface_ip_pim_drprio_cmd,
-       "ip pim drpriority (1-4294967295)",
+       "ip pim drpriority (0-4294967295)",
        IP_STR
        PIM_STR
        "Set the Designated Router Election Priority\n"
@@ -3966,7 +3969,7 @@ DEFUN (interface_ip_pim_drprio,
 
 DEFUN (interface_no_ip_pim_drprio,
        interface_no_ip_pim_drprio_cmd,
-       "no ip pim drpriority [(1-4294967295)]",
+       "no ip pim drpriority [(0-4294967295)]",
        NO_STR
        IP_STR
        PIM_STR

@@ -425,6 +425,11 @@ Route Selection
 
    Disabled by default.
 
+.. clicmd:: bgp bestpath med missing-as-worst
+
+   If the paths MED value is missing and this command is configured
+   then treat it as the worse possible value that it can be.
+
 .. clicmd:: maximum-paths (1-128)
 
    Sets the maximum-paths value used for ecmp calculations for this
@@ -584,25 +589,51 @@ Route Flap Dampening
 
 .. clicmd:: bgp dampening (1-45) (1-20000) (1-50000) (1-255)
 
-   This command enables BGP route-flap dampening and specifies dampening parameters.
+   This command enables (with optionally specified dampening parameters) or
+   disables route-flap dampening for all routes of a BGP instance.
+
+.. clicmd:: neighbor PEER dampening [(1-45) [(1-20000) (1-20000) (1-255)]]
+
+   This command enables (with optionally specified dampening parameters) or
+   disables route-flap dampening for all routes learned from a BGP peer.
+
+.. clicmd:: neighbor GROUP dampening [(1-45) [(1-20000) (1-20000) (1-255)]]
+
+   This command enables (with optionally specified dampening parameters) or
+   disables route-flap dampening for all routes learned from peers of a peer
+   group.
 
    half-life
-      Half-life time for the penalty
+      Half-life time for the penalty in minutes (default value: 15).
 
    reuse-threshold
-      Value to start reusing a route
+      Value to start reusing a route (default value: 750).
 
    suppress-threshold
-      Value to start suppressing a route
+      Value to start suppressing a route (default value: 2000).
 
    max-suppress
-      Maximum duration to suppress a stable route
+      Maximum duration to suppress a stable route in minutes (default value:
+      60).
 
    The route-flap damping algorithm is compatible with :rfc:`2439`. The use of
-   this command is not recommended nowadays.
+   these commands is not recommended nowadays.
 
    At the moment, route-flap dampening is not working per VRF and is working only
    for IPv4 unicast and multicast.
+
+   With different parameter sets configurable for BGP instances, peer groups and
+   peers, the active dampening profile for a route is chosen on the fly,
+   allowing for various changes in configuration (i.e. peer group memberships)
+   during runtime. The parameter sets are taking precedence in the following
+   order:
+
+   1. Peer
+   2. Peer group
+   3. BGP instance
+
+   The negating commands do not allow to exclude a peer/peer group from a peer
+   group/BGP instances configuration.
 
 .. seealso::
    https://www.ripe.net/publications/docs/ripe-378
@@ -1329,7 +1360,14 @@ OSPFv3 into ``address-family ipv4 unicast`` as OSPFv3 supports IPv6.
 
 .. clicmd:: redistribute <babel|connected|eigrp|isis|kernel|openfabric|ospf|ospf6|rip|ripng|sharp|static> [metric (0-4294967295)] [route-map WORD]
 
-Redistribute routes from other protocols into BGP.
+   Redistribute routes from other protocols into BGP.
+
+   Note - When redistributing a static route, or any better Admin Distance route,
+   into BGP for which the same path is learned dynamically from another BGP
+   speaker, if the redistribute path is more preferred from a BGP Best Path
+   standpoint than the dynamically learned path, then BGP will not export
+   the best path to Zebra(RIB) for installation into the routing table,
+   unless BGP receives the path before the static route is created.
 
 .. clicmd:: redistribute <table|table-direct> (1-65535)] [metric (0-4294967295)] [route-map WORD]
 
@@ -1559,6 +1597,15 @@ Configuring Peers
    Older versions have the implementation where extended community bandwidth
    value is carried encoded as uint32. To enable backward compatibility we
    need to disable IEEE floating-point encoding option per-peer.
+
+.. clicmd:: neighbor PEER extended-link-bandwidth
+
+   By default bandwidth in extended communities is carried encoded as IEEE
+   floating-point format, and is limited to maximum of 25 Gbps.
+
+   Enabling this parameter, you can use the bandwidth of to 4294967295 Mbps.
+
+   This is disabled by default.
 
 .. clicmd:: neighbor PEER enforce-first-as
 

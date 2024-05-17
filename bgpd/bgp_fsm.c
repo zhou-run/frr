@@ -1779,7 +1779,7 @@ bgp_connect_fail(struct peer_connection *connection)
 {
 	struct peer *peer = connection->peer;
 
-	if (peer_dynamic_neighbor(peer)) {
+	if (peer_dynamic_neighbor_no_nsf(peer)) {
 		if (bgp_debug_neighbor_events(peer))
 			zlog_debug("%s (dynamic neighbor) deleted (%s)",
 				   peer->host, __func__);
@@ -1794,6 +1794,26 @@ bgp_connect_fail(struct peer_connection *connection)
 	bgp_nht_interface_events(peer);
 
 	return bgp_stop(connection);
+}
+
+/* after connect is called(), getpeername is able to return
+ * port and address on non established streams
+ */
+static void bgp_connect_in_progress_update_connection(struct peer *peer)
+{
+	if (bgp_getsockname(peer) < 0) {
+		if (!peer->su_remote &&
+		    !BGP_CONNECTION_SU_UNSPEC(peer->connection)) {
+			/* if connect initiated, then dest port and dest addresses are well known */
+			peer->su_remote = sockunion_dup(&peer->connection->su);
+			if (sockunion_family(peer->su_remote) == AF_INET)
+				peer->su_remote->sin.sin_port =
+					htons(peer->port);
+			else if (sockunion_family(peer->su_remote) == AF_INET6)
+				peer->su_remote->sin6.sin6_port =
+					htons(peer->port);
+		}
+	}
 }
 
 /* This function is the first starting point of all BGP connection. It
@@ -1892,6 +1912,8 @@ static enum bgp_fsm_state_progress bgp_start(struct peer_connection *connection)
 				 __func__, peer->connection->fd);
 			return BGP_FSM_FAILURE;
 		}
+		bgp_connect_in_progress_update_connection(peer);
+
 		/*
 		 * - when the socket becomes ready, poll() will signify POLLOUT
 		 * - if it fails to connect, poll() will signify POLLHUP
@@ -2897,19 +2919,22 @@ int bgp_neighbor_graceful_restart(struct peer *peer,
 
 	peer_old_state = bgp_peer_gr_mode_get(peer);
 
-	if (peer_old_state == PEER_INVALID) {
-		zlog_debug("[BGP_GR] peer_old_state == Invalid state !");
+	if (BGP_DEBUG(graceful_restart, GRACEFUL_RESTART))
+		zlog_debug("%s [BGP_GR] peer_old_state: %d", __func__,
+			   peer_old_state);
+
+	if (peer_old_state == PEER_INVALID)
 		return BGP_ERR_GR_OPERATION_FAILED;
-	}
 
 	peer_state = peer->PEER_GR_FSM[peer_old_state][peer_gr_cmd];
 	peer_new_state = peer_state.next_state;
 
-	if (peer_new_state == PEER_INVALID) {
-		zlog_debug(
-			"[BGP_GR] Invalid bgp graceful restart command used !");
+	if (BGP_DEBUG(graceful_restart, GRACEFUL_RESTART))
+		zlog_debug("%s [BGP_GR] peer_new_state: %d", __func__,
+			   peer_new_state);
+
+	if (peer_new_state == PEER_INVALID)
 		return BGP_ERR_GR_INVALID_CMD;
-	}
 
 	if (peer_new_state != peer_old_state) {
 		result = peer_state.action_fun(peer, peer_old_state,
