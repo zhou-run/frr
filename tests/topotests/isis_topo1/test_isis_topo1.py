@@ -628,6 +628,146 @@ def test_isis_hello_padding_during_adjacency_formation():
     result = check_last_iih_packet_for_padding(r1, expect_padding=False)
     assert result is True, result
 
+def test_isis_neighbor_state():
+    "Check that the neighbor states remain normal when the ISIS type is switched."
+
+    tgen = get_topogen()
+    # Don't run this test if we have any failure.
+    if tgen.routers_have_failure():
+        pytest.skip(tgen.errors)
+
+    logger.info("Checking 'show isis neighbor json'")
+
+    # Establish a P2P link
+    # When the IS-IS type of r3 is set to level-1-2 and the IS-IS type of r5 is set to level-1,
+    # it is expected that all neighbors exist and are in the Up state
+    r3 = tgen.gears["r3"]
+    r3.vtysh_cmd(
+        """
+        configure
+        interface r3-eth1
+            isis network point-to-point
+        end
+        """
+    )
+    r5 = tgen.gears["r3"]
+    r5.vtysh_cmd(
+        """
+        configure
+        interface r5-eth0
+            isis network point-to-point
+        end
+        """
+    )
+    result = _check_isis_neighbor_json("r3", "r5", True, "Up", 1)
+    assert result is True, result
+    result = _check_isis_neighbor_json("r5", "r3", True, "Up", 0)
+    assert result is True, result
+
+    # Remove the configuration that affects the switch of IS-IS type.
+    # Configure the IS-IS type of r3 to transition from level-1-2 to level-2-only,
+    # while maintaining the IS-IS type of r5 as level-1.
+    # In this scenario,
+    # the expectation is that some neighbors do not exist or are in the Initializing state
+    r3.vtysh_cmd(
+        """
+        configure
+        router isis 1
+            no redistribute ipv4 connected level-1
+            no redistribute ipv6 connected level-1
+            is-type level-2-only
+        interface r3-eth1
+            isis circuit-type level-2-only
+        end
+        """
+    )
+    result = _check_isis_neighbor_json("r3", "r5", False, "Initializing", 1)
+    assert result is True, result
+    result = _check_isis_neighbor_json("r5", "r3", False, "Initializing", 0)
+    assert result is True, result
+
+    # Restore to initial configuration
+    r3.vtysh_cmd(
+        """
+        configure
+        router isis 1
+            no is-type
+            redistribute ipv4 connected level-1
+            redistribute ipv6 connected level-1
+        interface r3-eth1
+            isis circuit-type level-1
+            no isis network point-to-point
+        end
+        """
+    )
+    r5.vtysh_cmd(
+        """
+        configure
+        interface r5-eth0
+            no isis network point-to-point
+        end
+        """
+    )
+    result = _check_isis_neighbor_json("r3", "r5", True, "Up", 1)
+    assert result is True, result
+    result = _check_isis_neighbor_json("r5", "r3", True, "Up", 0)
+    assert result is True, result
+    
+
+def _check_isis_neighbor_json(router, neighbor, neighbor_expected, neighbor_state_expected, eth):
+    "Verfiy isis neighbor state in router's neighbor"
+
+    tgen = get_topogen()
+    router = tgen.gears[router]
+    logger.info(f"check_isis_neighbor_state {router}")
+    isis_neightor_output = router.vtysh_cmd(
+        "show isis neighbor {} json".format(neighbor)
+    )
+
+    neighbor_json = json.loads(isis_neightor_output)
+    result = _check_isis_neighbor_exist(router, neighbor, eth)
+    if result == True:
+        return _check_isis_neighbor_state(router, neighbor, neighbor_state_expected, eth)
+    elif neighbor_expected == True:
+        return "{} with expected neighbor {} got none ".format(
+            router.name, neighbor
+        )
+    else:
+        return True
+
+@retry(retry_timeout=5)
+def _check_isis_neighbor_exist(router, neighbor, eth):
+    tgen = get_topogen()
+    router = tgen.gears[router]
+    logger.info(f"check_isis_neighbor_exist {router}")
+    isis_neightor_output = router.vtysh_cmd(
+        "show isis neighbor {} json".format(neighbor)
+    )
+
+    neighbor_json = json.loads(isis_neightor_output)
+    if "state" not in neighbor_json["areas"][0]["circuits"][eth]:
+        return "The neighbor {} of router {} has not been learned yet ".format(
+            neighbor, router.name
+        )
+
+    return True
+
+@retry(retry_timeout=5)
+def _check_isis_neighbor_state(router, neighbor, neighbor_state_expected, eth):
+    tgen = get_topogen()
+    router = tgen.gears[router]
+    logger.info(f"check_isis_neighbor_state {router}")
+    isis_neightor_output = router.vtysh_cmd(
+        "show isis neighbor {} json".format(neighbor)
+    )
+
+    neighbor_json = json.loads(isis_neightor_output)
+    neighbor_state = neighbor_json["areas"][0]["circuits"][eth]["state"]
+    if neighbor_state == neighbor_state_expected:
+        return True
+    return "{} peer with expected neighbor_state {} got {} ".format(
+        router.name, neighbor_state_expected, neighbor_state
+    )
 
 @retry(retry_timeout=5)
 def check_last_iih_packet_for_padding(router, expect_padding):
