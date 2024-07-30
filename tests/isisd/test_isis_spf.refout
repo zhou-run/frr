@@ -3,7 +3,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt1                                                              
- 10.0.255.1/32  IP internal  0                            rt1(4)  
+ 10.0.255.1/32  IP TE        0                            rt1(4)  
  rt2            TE-IS        10      rt2       -          rt1(4)  
  rt3            TE-IS        10      rt3       -          rt1(4)  
  rt4            TE-IS        20      rt2       -          rt2(4)  
@@ -66,7 +66,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt1                                                              
- 10.0.255.1/32  IP internal  0                            rt1(4)  
+ 10.0.255.1/32  IP TE        0                            rt1(4)  
  rt4            TE-IS        10      rt4       -          rt1(4)  
  rt5            TE-IS        10      rt5       -          rt1(4)  
  rt2            TE-IS        15      rt2       -          rt1(4)  
@@ -131,7 +131,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt1                                                              
- 10.0.255.1/32  IP internal  0                            rt1(4)  
+ 10.0.255.1/32  IP TE        0                            rt1(4)  
  rt2            TE-IS        10      rt2       -          rt1(4)  
  rt3            TE-IS        10      rt3       -          rt1(4)  
  rt4            TE-IS        20      rt2       -          rt2(4)  
@@ -160,7 +160,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt1                                                              
- 10.0.255.1/32  IP internal  0                            rt1(4)  
+ 10.0.255.1/32  IP TE        0                            rt1(4)  
  rt2            TE-IS        10      rt2       -          rt1(4)  
  rt3            TE-IS        10      rt3       -          rt1(4)  
  rt4            TE-IS        20      rt2       -          rt2(4)  
@@ -195,7 +195,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt1                                                              
- 10.0.255.1/32  IP internal  0                            rt1(4)  
+ 10.0.255.1/32  IP TE        0                            rt1(4)  
  rt2            TE-IS        10      rt2       -          rt1(4)  
  rt3            TE-IS        10      rt3       -          rt1(4)  
  rt4            TE-IS        20      rt2       -          rt2(4)  
@@ -233,7 +233,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt1                                                              
- 10.0.255.1/32  IP internal  0                            rt1(4)  
+ 10.0.255.1/32  IP TE        0                            rt1(4)  
  rt2            TE-IS        10      rt2       -          rt1(4)  
  rt3            TE-IS        10      rt3       -          rt1(4)  
  rt4            TE-IS        20      rt2       -          rt2(4)  
@@ -283,7 +283,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex          Type         Metric  Next-Hop  Interface  Parent   
  -------------------------------------------------------------------
  rt1                                                                
- 10.0.255.1/32   IP internal  0                            rt1(4)   
+ 10.0.255.1/32   IP TE        0                            rt1(4)   
  rt4             TE-IS        10      rt4       -          rt1(4)   
  rt5             TE-IS        20      rt4       -          rt4(4)   
  rt7             TE-IS        20      rt4       -          rt4(4)   
@@ -333,7 +333,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex          Type         Metric  Next-Hop  Interface  Parent   
  -------------------------------------------------------------------
  rt1                                                                
- 10.0.255.1/32   IP internal  0                            rt1(4)   
+ 10.0.255.1/32   IP TE        0                            rt1(4)   
  rt2             TE-IS        10      rt2       -          rt1(4)   
  rt4             TE-IS        10      rt4       -          rt1(4)   
  rt3             TE-IS        20      rt2       -          rt2(4)   
@@ -382,7 +382,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt1                                                              
- 10.0.255.1/32  IP internal  0                            rt1(4)  
+ 10.0.255.1/32  IP TE        0                            rt1(4)  
  rt2            TE-IS        10      rt2       -          rt1(4)  
  rt3            TE-IS        10      rt3       -          rt1(4)  
  rt4            TE-IS        20      rt2       -          rt2(4)  
@@ -463,7 +463,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt1                                                              
- 10.0.255.1/32  IP internal  0                            rt1(4)  
+ 10.0.255.1/32  IP TE        0                            rt1(4)  
  rt2            TE-IS        10      rt2       -          rt1(4)  
  rt3            TE-IS        20      rt3       -          rt1(4)  
  rt4            TE-IS        20      rt4       -          rt1(4)  
@@ -532,7 +532,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type          Metric  Next-Hop  Interface  Parent  
  ------------------------------------------------------------------
  rt1                                                               
- 10.0.255.1/32  IP internal   0                            rt1(4)  
+ 10.0.255.1/32  IP TE         0                            rt1(4)  
  rt2            TE-IS         10      rt2       -          rt1(4)  
  rt3            TE-IS         10      rt3       -          rt1(4)  
  rt2            pseudo_TE-IS  20      rt3       -          rt3(4)  
@@ -597,7 +597,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex          Type         Metric  Next-Hop  Interface  Parent   
  -------------------------------------------------------------------
  rt1                                                                
- 10.0.255.1/32   IP internal  0                            rt1(4)   
+ 10.0.255.1/32   IP TE        0                            rt1(4)   
  rt2             TE-IS        10      rt2       -          rt1(4)   
  rt3             TE-IS        10      rt3       -          rt1(4)   
  rt4             TE-IS        20      rt2       -          rt2(4)   
@@ -638,7 +638,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt1                                                              
- 10.0.255.1/32  IP internal  0                            rt1(4)  
+ 10.0.255.1/32  IP TE        0                            rt1(4)  
  rt2            TE-IS        10      rt2       -          rt1(4)  
  rt3            TE-IS        10      rt3       -          rt1(4)  
  rt4            TE-IS        20      rt2       -          rt2(4)  
@@ -675,7 +675,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt1                                                              
- 10.0.255.1/32  IP internal  0                            rt1(4)  
+ 10.0.255.1/32  IP TE        0                            rt1(4)  
  rt2            TE-IS        10      rt2       -          rt1(4)  
  rt3            TE-IS        10      rt3       -          rt1(4)  
  rt4            TE-IS        20      rt2       -          rt2(4)  
@@ -710,7 +710,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type          Metric  Next-Hop  Interface  Parent  
  ------------------------------------------------------------------
  rt1                                                               
- 10.0.255.1/32  IP internal   0                            rt1(4)  
+ 10.0.255.1/32  IP TE         0                            rt1(4)  
  rt2            TE-IS         10                           rt1(4)  
  rt3            TE-IS         10      rt3       -          rt1(4)  
  rt2            pseudo_TE-IS  20      rt3       -          rt3(4)  
@@ -768,7 +768,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt1                                                              
- 10.0.255.1/32  IP internal  0                            rt1(4)  
+ 10.0.255.1/32  IP TE        0                            rt1(4)  
  rt2            TE-IS        10      rt2       -          rt1(4)  
  rt3            TE-IS        10      rt3       -          rt1(4)  
  rt4            TE-IS        20      rt2       -          rt2(4)  
@@ -839,7 +839,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type          Metric  Next-Hop  Interface  Parent  
  ------------------------------------------------------------------
  rt4                                                               
- 10.0.255.4/32  IP internal   0                            rt4(4)  
+ 10.0.255.4/32  IP TE         0                            rt4(4)  
  rt1            TE-IS         10      rt1       -          rt4(4)  
  rt5            TE-IS         10      rt5       -          rt4(4)  
  rt6            TE-IS         10      rt6       -          rt4(4)  
@@ -916,7 +916,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type          Metric  Next-Hop  Interface  Parent  
  ------------------------------------------------------------------
  rt4                                                               
- 10.0.255.4/32  IP internal   0                            rt4(4)  
+ 10.0.255.4/32  IP TE         0                            rt4(4)  
  rt1            TE-IS         10      rt1       -          rt4(4)  
  rt5            TE-IS         10      rt5       -          rt4(4)  
  rt6            TE-IS         10      rt6       -          rt4(4)  
@@ -993,7 +993,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt1                                                              
- 10.0.255.1/32  IP internal  0                            rt1(4)  
+ 10.0.255.1/32  IP TE        0                            rt1(4)  
  rt2            TE-IS        10      rt2       -          rt1(4)  
  rt3            TE-IS        10      rt3       -          rt1(4)  
  rt4            TE-IS        20      rt2       -          rt2(4)  
@@ -1047,7 +1047,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt1                                                              
- 10.0.255.1/32  IP internal  0                            rt1(4)  
+ 10.0.255.1/32  IP TE        0                            rt1(4)  
  rt2            TE-IS        10      rt2       -          rt1(4)  
  rt3            TE-IS        10      rt3       -          rt1(4)  
  rt4            TE-IS        20      rt2       -          rt2(4)  
@@ -1098,7 +1098,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex          Type         Metric  Next-Hop  Interface  Parent   
  -------------------------------------------------------------------
  rt1                                                                
- 10.0.255.1/32   IP internal  0                            rt1(4)   
+ 10.0.255.1/32   IP TE        0                            rt1(4)   
  rt4             TE-IS        10      rt4       -          rt1(4)   
  rt5             TE-IS        20      rt4       -          rt4(4)   
  rt7             TE-IS        20      rt4       -          rt4(4)   
@@ -1180,7 +1180,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex          Type         Metric  Next-Hop  Interface  Parent   
  -------------------------------------------------------------------
  rt7                                                                
- 10.0.255.7/32   IP internal  0                            rt7(4)   
+ 10.0.255.7/32   IP TE        0                            rt7(4)   
  rt4             TE-IS        10      rt4       -          rt7(4)   
  rt8             TE-IS        10      rt8       -          rt7(4)   
  rt10            TE-IS        20      rt10      -          rt7(4)   
@@ -1266,7 +1266,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex          Type         Metric  Next-Hop  Interface  Parent   
  -------------------------------------------------------------------
  rt8                                                                
- 10.0.255.8/32   IP internal  0                            rt8(4)   
+ 10.0.255.8/32   IP TE        0                            rt8(4)   
  rt5             TE-IS        10      rt5       -          rt8(4)   
  rt7             TE-IS        10      rt7       -          rt8(4)   
  rt9             TE-IS        10      rt9       -          rt8(4)   
@@ -1347,7 +1347,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt3                                                              
- 10.0.255.3/32  IP internal  0                            rt3(4)  
+ 10.0.255.3/32  IP TE        0                            rt3(4)  
  rt1            TE-IS        10      rt1       -          rt3(4)  
  rt2            TE-IS        20      rt1       -          rt1(4)  
  10.0.255.1/32  IP TE        20      rt1       -          rt1(4)  
@@ -1458,7 +1458,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt8                                                              
- 10.0.255.8/32  IP internal  0                            rt8(4)  
+ 10.0.255.8/32  IP TE        0                            rt8(4)  
  rt5            TE-IS        10      rt5       -          rt8(4)  
  rt2            TE-IS        20      rt5       -          rt5(4)  
  10.0.255.5/32  IP TE        20      rt5       -          rt5(4)  
@@ -1561,7 +1561,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type          Metric  Next-Hop  Interface  Parent  
  ------------------------------------------------------------------
  rt3                                                               
- 10.0.255.3/32  IP internal   0                            rt3(4)  
+ 10.0.255.3/32  IP TE         0                            rt3(4)  
  rt1            TE-IS         10      rt1       -          rt3(4)  
  rt2            TE-IS         10      rt2       -          rt3(4)  
  rt5            TE-IS         10      rt5       -          rt3(4)  
@@ -1644,7 +1644,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt4                                                              
- 10.0.255.4/32  IP internal  0                            rt4(4)  
+ 10.0.255.4/32  IP TE        0                            rt4(4)  
  rt2            TE-IS        10      rt2       -          rt4(4)  
  rt3            TE-IS        10      rt3       -          rt4(4)  
  rt1            TE-IS        20      rt2       -          rt2(4)  
@@ -1706,7 +1706,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt1                                                              
- 10.0.255.1/32  IP internal  0                            rt1(4)  
+ 10.0.255.1/32  IP TE        0                            rt1(4)  
  rt3            TE-IS        10      rt3       -          rt1(4)  
  rt4            TE-IS        10      rt4       -          rt1(4)  
  rt2            TE-IS        10      rt2       -          rt1(4)  
@@ -1767,7 +1767,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt1                                                              
- 10.0.255.1/32  IP internal  0                            rt1(4)  
+ 10.0.255.1/32  IP TE        0                            rt1(4)  
  rt3            TE-IS        10      rt3       -          rt1(4)  
  rt4            TE-IS        10      rt4       -          rt1(4)  
  rt2            TE-IS        10      rt2       -          rt1(4)  
@@ -1836,7 +1836,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type          Metric  Next-Hop  Interface  Parent  
  ------------------------------------------------------------------
  rt5                                                               
- 10.0.255.5/32  IP internal   0                            rt5(4)  
+ 10.0.255.5/32  IP TE         0                            rt5(4)  
  rt4            TE-IS         10      rt4       -          rt5(4)  
  rt1            pseudo_TE-IS  20      rt4       -          rt4(4)  
  rt1            TE-IS         20      rt4       -          rt1(2)  
@@ -1928,7 +1928,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt1                                                              
- 10.0.255.1/32  IP internal  0                            rt1(4)  
+ 10.0.255.1/32  IP TE        0                            rt1(4)  
  rt3            TE-IS        10      rt3       -          rt1(4)  
  rt5            TE-IS        20      rt3       -          rt3(4)  
  10.0.255.3/32  IP TE        20      rt3       -          rt3(4)  
@@ -1945,7 +1945,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt1                                                              
- 10.0.255.1/32  IP internal  0                            rt1(4)  
+ 10.0.255.1/32  IP TE        0                            rt1(4)  
  rt2            TE-IS        10      rt2       -          rt1(4)  
  rt3            TE-IS        10      rt3       -          rt1(4)  
  rt4            TE-IS        20      rt2       -          rt2(4)  
@@ -2077,7 +2077,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type          Metric  Next-Hop  Interface  Parent  
  ------------------------------------------------------------------
  rt5                                                               
- 10.0.255.5/32  IP internal   0                            rt5(4)  
+ 10.0.255.5/32  IP TE         0                            rt5(4)  
  rt6            TE-IS         10      rt6       -          rt5(4)  
  rt4            TE-IS         20      rt6       -          rt6(4)  
  10.0.255.6/32  IP TE         20      rt6       -          rt6(4)  
@@ -2095,7 +2095,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type          Metric  Next-Hop  Interface  Parent  
  ------------------------------------------------------------------
  rt5                                                               
- 10.0.255.5/32  IP internal   0                            rt5(4)  
+ 10.0.255.5/32  IP TE         0                            rt5(4)  
  rt1            TE-IS         10      rt1       -          rt5(4)  
  rt4            TE-IS         10      rt4       -          rt5(4)  
  rt6            TE-IS         10      rt6       -          rt5(4)  
@@ -2244,7 +2244,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt5                                                              
- 10.0.255.5/32  IP internal  0                            rt5(4)  
+ 10.0.255.5/32  IP TE        0                            rt5(4)  
  rt6            TE-IS        10      rt6       -          rt5(4)  
  rt4            TE-IS        20      rt6       -          rt6(4)  
  10.0.255.6/32  IP TE        20      rt6       -          rt6(4)  
@@ -2263,7 +2263,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt5                                                              
- 10.0.255.5/32  IP internal  0                            rt5(4)  
+ 10.0.255.5/32  IP TE        0                            rt5(4)  
  rt4            TE-IS        10      rt4       -          rt5(4)  
  rt6            TE-IS        10      rt6       -          rt5(4)  
  rt2            TE-IS        20      rt4       -          rt4(4)  
@@ -2335,7 +2335,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt5                                                              
- 10.0.255.5/32  IP internal  0                            rt5(4)  
+ 10.0.255.5/32  IP TE        0                            rt5(4)  
  rt4            TE-IS        10      rt4       -          rt5(4)  
  rt6            TE-IS        10      rt6       -          rt5(4)  
  rt2            TE-IS        20      rt4       -          rt4(4)  
@@ -2352,7 +2352,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt5                                                              
- 10.0.255.5/32  IP internal  0                            rt5(4)  
+ 10.0.255.5/32  IP TE        0                            rt5(4)  
  rt4            TE-IS        10      rt4       -          rt5(4)  
  rt6            TE-IS        10      rt6       -          rt5(4)  
  rt2            TE-IS        20      rt4       -          rt4(4)  
@@ -2405,7 +2405,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt1                                                              
- 10.0.255.1/32  IP internal  0                            rt1(4)  
+ 10.0.255.1/32  IP TE        0                            rt1(4)  
  rt3            TE-IS        10      rt3       -          rt1(4)  
  rt5            TE-IS        20      rt3       -          rt3(4)  
  10.0.255.3/32  IP TE        20      rt3       -          rt3(4)  
@@ -2426,7 +2426,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt1                                                              
- 10.0.255.1/32  IP internal  0                            rt1(4)  
+ 10.0.255.1/32  IP TE        0                            rt1(4)  
  rt2            TE-IS        10      rt2       -          rt1(4)  
  rt3            TE-IS        10      rt3       -          rt1(4)  
  rt4            TE-IS        20      rt2       -          rt2(4)  
@@ -2495,7 +2495,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt4                                                              
- 10.0.255.4/32  IP internal  0                            rt4(4)  
+ 10.0.255.4/32  IP TE        0                            rt4(4)  
  rt2            TE-IS        10      rt2       -          rt4(4)  
  rt6            TE-IS        10      rt6       -          rt4(4)  
  rt1            TE-IS        20      rt2       -          rt2(4)  
@@ -2517,7 +2517,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt4                                                              
- 10.0.255.4/32  IP internal  0                            rt4(4)  
+ 10.0.255.4/32  IP TE        0                            rt4(4)  
  rt2            TE-IS        10      rt2       -          rt4(4)  
  rt3            TE-IS        10      rt3       -          rt4(4)  
  rt6            TE-IS        10      rt6       -          rt4(4)  
@@ -2589,7 +2589,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex          Type         Metric  Next-Hop  Interface  Parent   
  -------------------------------------------------------------------
  rt11                                                               
- 10.0.255.11/32  IP internal  0                            rt11(4)  
+ 10.0.255.11/32  IP TE        0                            rt11(4)  
  rt10            TE-IS        10      rt10      -          rt11(4)  
  rt12            TE-IS        10      rt12      -          rt11(4)  
  rt9             TE-IS        20      rt12      -          rt12(4)  
@@ -2620,7 +2620,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex          Type         Metric  Next-Hop  Interface  Parent   
  -------------------------------------------------------------------
  rt11                                                               
- 10.0.255.11/32  IP internal  0                            rt11(4)  
+ 10.0.255.11/32  IP TE        0                            rt11(4)  
  rt8             TE-IS        10      rt8       -          rt11(4)  
  rt10            TE-IS        10      rt10      -          rt11(4)  
  rt12            TE-IS        10      rt12      -          rt11(4)  
@@ -2718,7 +2718,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex          Type         Metric  Next-Hop  Interface  Parent   
  -------------------------------------------------------------------
  rt6                                                                
- 10.0.255.6/32   IP internal  0                            rt6(4)   
+ 10.0.255.6/32   IP TE        0                            rt6(4)   
  rt3             TE-IS        10      rt3       -          rt6(4)   
  rt2             TE-IS        20      rt3       -          rt3(4)   
  10.0.255.3/32   IP TE        20      rt3       -          rt3(4)   
@@ -2755,7 +2755,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex          Type         Metric  Next-Hop  Interface  Parent   
  -------------------------------------------------------------------
  rt6                                                                
- 10.0.255.6/32   IP internal  0                            rt6(4)   
+ 10.0.255.6/32   IP TE        0                            rt6(4)   
  rt3             TE-IS        10      rt3       -          rt6(4)   
  rt5             TE-IS        10      rt5       -          rt6(4)   
  rt2             TE-IS        20      rt3       -          rt3(4)   
@@ -2851,7 +2851,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex          Type         Metric  Next-Hop  Interface  Parent   
  -------------------------------------------------------------------
  rt2                                                                
- 10.0.255.2/32   IP internal  0                            rt2(4)   
+ 10.0.255.2/32   IP TE        0                            rt2(4)   
  rt1             TE-IS        10      rt1       -          rt2(4)   
  rt3             TE-IS        10      rt3       -          rt2(4)   
  rt4             TE-IS        20      rt1       -          rt1(4)   
@@ -2881,7 +2881,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex          Type         Metric  Next-Hop  Interface  Parent   
  -------------------------------------------------------------------
  rt2                                                                
- 10.0.255.2/32   IP internal  0                            rt2(4)   
+ 10.0.255.2/32   IP TE        0                            rt2(4)   
  rt1             TE-IS        10      rt1       -          rt2(4)   
  rt3             TE-IS        10      rt3       -          rt2(4)   
  rt5             TE-IS        10      rt5       -          rt2(4)   
@@ -2964,7 +2964,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt2                                                              
- 10.0.255.2/32  IP internal  0                            rt2(4)  
+ 10.0.255.2/32  IP TE        0                            rt2(4)  
  rt1            TE-IS        50      rt1       -          rt2(4)  
  rt3            TE-IS        50      rt3       -          rt2(4)  
  rt2                                                              
@@ -2982,7 +2982,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt2                                                              
- 10.0.255.2/32  IP internal  0                            rt2(4)  
+ 10.0.255.2/32  IP TE        0                            rt2(4)  
  rt4            TE-IS        10      rt4       -          rt2(4)  
  rt5            TE-IS        20      rt4       -          rt4(4)  
  rt6            TE-IS        20      rt4       -          rt4(4)  
@@ -3123,7 +3123,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt1                                                              
- 10.0.255.1/32  IP internal  0                            rt1(4)  
+ 10.0.255.1/32  IP TE        0                            rt1(4)  
  rt2            TE-IS        10      rt2       -          rt1(4)  
  rt4            TE-IS        20      rt2       -          rt2(4)  
  10.0.255.2/32  IP TE        20      rt2       -          rt2(4)  
@@ -3143,7 +3143,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt1                                                              
- 10.0.255.1/32  IP internal  0                            rt1(4)  
+ 10.0.255.1/32  IP TE        0                            rt1(4)  
  rt2            TE-IS        10      rt2       -          rt1(4)  
  rt3            TE-IS        10      rt3       -          rt1(4)  
  rt4            TE-IS        20      rt2       -          rt2(4)  
@@ -3205,7 +3205,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt1                                                              
- 10.0.255.1/32  IP internal  0                            rt1(4)  
+ 10.0.255.1/32  IP TE        0                            rt1(4)  
  rt3            TE-IS        10      rt3       -          rt1(4)  
  rt5            TE-IS        20      rt3       -          rt3(4)  
  10.0.255.3/32  IP TE        20      rt3       -          rt3(4)  
@@ -3292,7 +3292,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt1                                                              
- 10.0.255.1/32  IP internal  0                            rt1(4)  
+ 10.0.255.1/32  IP TE        0                            rt1(4)  
  rt4            TE-IS        10      rt4       -          rt1(4)  
  rt5            TE-IS        10      rt5       -          rt1(4)  
  rt2            TE-IS        15      rt2       -          rt1(4)  
@@ -3386,7 +3386,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt1                                                              
- 10.0.255.1/32  IP internal  0                            rt1(4)  
+ 10.0.255.1/32  IP TE        0                            rt1(4)  
  rt2            TE-IS        15      rt2       -          rt1(4)  
  10.0.255.2/32  IP TE        25      rt2       -          rt2(4)  
  rt3            TE-IS        30      rt3       -          rt1(4)  
@@ -3476,7 +3476,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type          Metric  Next-Hop  Interface  Parent  
  ------------------------------------------------------------------
  rt5                                                               
- 10.0.255.5/32  IP internal   0                            rt5(4)  
+ 10.0.255.5/32  IP TE         0                            rt5(4)  
  rt6            TE-IS         10      rt6       -          rt5(4)  
  rt4            TE-IS         20      rt6       -          rt6(4)  
  10.0.255.6/32  IP TE         20      rt6       -          rt6(4)  
@@ -3573,7 +3573,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt5                                                              
- 10.0.255.5/32  IP internal  0                            rt5(4)  
+ 10.0.255.5/32  IP TE        0                            rt5(4)  
  rt6            TE-IS        10      rt6       -          rt5(4)  
  rt4            TE-IS        20      rt6       -          rt6(4)  
  10.0.255.6/32  IP TE        20      rt6       -          rt6(4)  
@@ -3629,7 +3629,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt5                                                              
- 10.0.255.5/32  IP internal  0                            rt5(4)  
+ 10.0.255.5/32  IP TE        0                            rt5(4)  
  rt4            TE-IS        10      rt4       -          rt5(4)  
  rt6            TE-IS        10      rt6       -          rt5(4)  
  rt2            TE-IS        20      rt4       -          rt4(4)  
@@ -3665,7 +3665,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt1                                                              
- 10.0.255.1/32  IP internal  0                            rt1(4)  
+ 10.0.255.1/32  IP TE        0                            rt1(4)  
  rt3            TE-IS        10      rt3       -          rt1(4)  
  rt5            TE-IS        20      rt3       -          rt3(4)  
  10.0.255.3/32  IP TE        20      rt3       -          rt3(4)  
@@ -3714,7 +3714,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt4                                                              
- 10.0.255.4/32  IP internal  0                            rt4(4)  
+ 10.0.255.4/32  IP TE        0                            rt4(4)  
  rt2            TE-IS        10      rt2       -          rt4(4)  
  rt1            TE-IS        20      rt2       -          rt2(4)  
  10.0.255.2/32  IP TE        20      rt2       -          rt2(4)  
@@ -3760,7 +3760,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt1                                                              
- 10.0.255.1/32  IP internal  0                            rt1(4)  
+ 10.0.255.1/32  IP TE        0                            rt1(4)  
  rt3            TE-IS        10      rt3       -          rt1(4)  
  rt5            TE-IS        20      rt3       -          rt3(4)  
  10.0.255.3/32  IP TE        20      rt3       -          rt3(4)  
@@ -3811,7 +3811,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt4                                                              
- 10.0.255.4/32  IP internal  0                            rt4(4)  
+ 10.0.255.4/32  IP TE        0                            rt4(4)  
  rt2            TE-IS        10      rt2       -          rt4(4)  
  rt6            TE-IS        10      rt6       -          rt4(4)  
  rt1            TE-IS        20      rt2       -          rt2(4)  
@@ -3865,7 +3865,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex          Type         Metric  Next-Hop  Interface  Parent   
  -------------------------------------------------------------------
  rt11                                                               
- 10.0.255.11/32  IP internal  0                            rt11(4)  
+ 10.0.255.11/32  IP TE        0                            rt11(4)  
  rt10            TE-IS        10      rt10      -          rt11(4)  
  rt12            TE-IS        10      rt12      -          rt11(4)  
  rt9             TE-IS        20      rt12      -          rt12(4)  
@@ -3941,7 +3941,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex          Type         Metric  Next-Hop  Interface  Parent   
  -------------------------------------------------------------------
  rt6                                                                
- 10.0.255.6/32   IP internal  0                            rt6(4)   
+ 10.0.255.6/32   IP TE        0                            rt6(4)   
  rt3             TE-IS        10      rt3       -          rt6(4)   
  rt2             TE-IS        20      rt3       -          rt3(4)   
  10.0.255.3/32   IP TE        20      rt3       -          rt3(4)   
@@ -4022,7 +4022,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex          Type         Metric  Next-Hop  Interface  Parent   
  -------------------------------------------------------------------
  rt2                                                                
- 10.0.255.2/32   IP internal  0                            rt2(4)   
+ 10.0.255.2/32   IP TE        0                            rt2(4)   
  rt3             TE-IS        10      rt3       -          rt2(4)   
  rt5             TE-IS        10      rt5       -          rt2(4)   
  rt6             TE-IS        20      rt3       -          rt3(4)   
@@ -4089,7 +4089,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex          Type         Metric  Next-Hop  Interface  Parent   
  -------------------------------------------------------------------
  rt2                                                                
- 10.0.255.2/32   IP internal  0                            rt2(4)   
+ 10.0.255.2/32   IP TE        0                            rt2(4)   
  rt1             TE-IS        10      rt1       -          rt2(4)   
  rt3             TE-IS        10      rt3       -          rt2(4)   
  rt4             TE-IS        20      rt1       -          rt1(4)   
@@ -4151,7 +4151,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt1                                                              
- 10.0.255.1/32  IP internal  0                            rt1(4)  
+ 10.0.255.1/32  IP TE        0                            rt1(4)  
  rt2            TE-IS        10      rt2       -          rt1(4)  
  rt4            TE-IS        20      rt2       -          rt2(4)  
  10.0.255.2/32  IP TE        20      rt2       -          rt2(4)  
@@ -4252,7 +4252,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt1                                                              
- 10.0.255.1/32  IP internal  0                            rt1(4)  
+ 10.0.255.1/32  IP TE        0                            rt1(4)  
  rt3            TE-IS        10      rt3       -          rt1(4)  
  10.0.255.3/32  IP TE        20      rt3       -          rt3(4)  
  rt4            TE-IS        110     rt3       -          rt3(4)  
@@ -4365,7 +4365,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt9                                                              
- 10.0.255.9/32  IP internal  0                            rt9(4)  
+ 10.0.255.9/32  IP TE        0                            rt9(4)  
  rt6            TE-IS        10      rt6       -          rt9(4)  
  rt7            TE-IS        10      rt7       -          rt9(4)  
  rt8            TE-IS        10      rt8       -          rt9(4)  
@@ -4538,7 +4538,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt9                                                              
- 10.0.255.9/32  IP internal  0                            rt9(4)  
+ 10.0.255.9/32  IP TE        0                            rt9(4)  
  rt5            TE-IS        10      rt5       -          rt9(4)  
  rt6            TE-IS        10      rt6       -          rt9(4)  
  rt7            TE-IS        10      rt7       -          rt9(4)  
@@ -4641,7 +4641,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt1                                                              
- 10.0.255.1/32  IP internal  0                            rt1(4)  
+ 10.0.255.1/32  IP TE        0                            rt1(4)  
  rt3            TE-IS        20      rt3       -          rt1(4)  
  rt4            TE-IS        20      rt4       -          rt1(4)  
  rt6            TE-IS        30      rt3       -          rt3(4)  
@@ -4757,7 +4757,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt1                                                              
- 10.0.255.1/32  IP internal  0                            rt1(4)  
+ 10.0.255.1/32  IP TE        0                            rt1(4)  
  rt2            TE-IS        10      rt2       -          rt1(4)  
  rt3            TE-IS        20      rt3       -          rt1(4)  
  rt5            TE-IS        20      rt2       -          rt2(4)  
@@ -4854,7 +4854,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt2                                                              
- 10.0.255.2/32  IP internal  0                            rt2(4)  
+ 10.0.255.2/32  IP TE        0                            rt2(4)  
  rt1            TE-IS        50      rt1       -          rt2(4)  
  rt3            TE-IS        50      rt3       -          rt2(4)  
  rt2                                                              
@@ -4948,7 +4948,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex          Type         Metric  Next-Hop  Interface  Parent   
  -------------------------------------------------------------------
  rt1                                                                
- 10.0.255.1/32   IP internal  0                            rt1(4)   
+ 10.0.255.1/32   IP TE        0                            rt1(4)   
  rt2             TE-IS        10      rt2       -          rt1(4)   
  rt4             TE-IS        20      rt2       -          rt2(4)   
  10.0.255.2/32   IP TE        20      rt2       -          rt2(4)   
@@ -4997,7 +4997,7 @@ IS-IS paths to level-1 routers that speak IP
  Vertex         Type         Metric  Next-Hop  Interface  Parent  
  -----------------------------------------------------------------
  rt1                                                              
- 10.0.255.1/32  IP internal  0                            rt1(4)  
+ 10.0.255.1/32  IP TE        0                            rt1(4)  
  rt2            TE-IS        10      rt2       -          rt1(4)  
  rt4            TE-IS        20      rt2       -          rt2(4)  
  10.0.255.2/32  IP TE        20      rt2       -          rt2(4)  
