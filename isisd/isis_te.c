@@ -346,6 +346,32 @@ void isis_link_params_update(struct isis_circuit *circuit,
 
 	ext = circuit->ext;
 
+	/* If known, register local IPv4 addr from ip_addr list */
+	if (listcount(circuit->ip_addrs) != 0) {
+		addr = (struct prefix_ipv4 *)listgetdata(
+			(struct listnode *)listhead(circuit->ip_addrs));
+		IPV4_ADDR_COPY(&ext->local_addr, &addr->prefix);
+		SET_SUBTLV(ext, EXT_LOCAL_ADDR);
+	} else
+		UNSET_SUBTLV(ext, EXT_LOCAL_ADDR);
+
+	/* If known, register local IPv6 addr from ip_addr list */
+	if (listcount(circuit->ipv6_non_link) != 0) {
+		addr6 = (struct prefix_ipv6 *)listgetdata(
+			(struct listnode *)listhead(
+				circuit->ipv6_non_link));
+		IPV6_ADDR_COPY(&ext->local_addr6, &addr6->prefix);
+		SET_SUBTLV(ext, EXT_LOCAL_ADDR6);
+	} else
+		UNSET_SUBTLV(ext, EXT_LOCAL_ADDR6);
+
+	/*
+	 * Remote IPv4 and IPv6 addresses are now added in
+	 * isis_mpls_te_adj_ip_enabled() to get the right IP address
+	 * in particular for IPv6 to get the global IPv6 address and
+	 * not the link-local IPv6 address.
+	 */
+
 	/* Fulfill Extended subTLVs from interface link parameters */
 	if (HAS_LINK_PARAMS(ifp)) {
 		/* STD_TE metrics */
@@ -374,32 +400,6 @@ void isis_link_params_update(struct isis_circuit *circuit,
 			admin_group_allow_explicit_zero(&ext->ext_admin_group);
 			SET_SUBTLV(ext, EXT_EXTEND_ADM_GRP);
 		}
-
-		/* If known, register local IPv4 addr from ip_addr list */
-		if (listcount(circuit->ip_addrs) != 0) {
-			addr = (struct prefix_ipv4 *)listgetdata(
-				(struct listnode *)listhead(circuit->ip_addrs));
-			IPV4_ADDR_COPY(&ext->local_addr, &addr->prefix);
-			SET_SUBTLV(ext, EXT_LOCAL_ADDR);
-		} else
-			UNSET_SUBTLV(ext, EXT_LOCAL_ADDR);
-
-		/* If known, register local IPv6 addr from ip_addr list */
-		if (listcount(circuit->ipv6_non_link) != 0) {
-			addr6 = (struct prefix_ipv6 *)listgetdata(
-				(struct listnode *)listhead(
-					circuit->ipv6_non_link));
-			IPV6_ADDR_COPY(&ext->local_addr6, &addr6->prefix);
-			SET_SUBTLV(ext, EXT_LOCAL_ADDR6);
-		} else
-			UNSET_SUBTLV(ext, EXT_LOCAL_ADDR6);
-
-		/*
-		 * Remote IPv4 and IPv6 addresses are now added in
-		 * isis_mpls_te_adj_ip_enabled() to get the right IP address
-		 * in particular for IPv6 to get the global IPv6 address and
-		 * not the link-local IPv6 address.
-		 */
 
 		if (IS_PARAM_SET(ifp->link_params, LP_MAX_BW)) {
 			ext->max_bw = ifp->link_params->max_bw;
